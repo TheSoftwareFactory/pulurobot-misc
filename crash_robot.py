@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+#
+# A simple example of how to send a malformed packet that
+# could crash the robot.
 
 import socket, sys, struct, binascii
 

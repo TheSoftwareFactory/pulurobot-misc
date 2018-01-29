@@ -59,7 +59,7 @@ address_in_use = local_address
 sock = None
 
 
-class ConnectionRefusedError(object):
+class ConnectionRefusedError(BaseException):
     pass
 
 
@@ -144,8 +144,8 @@ def move_to_charger():
 
 
 # Manually moves the robot back and forth or rotates
-def manual_move(direction=Commands.directions["dForward"]):
-    if direction not in Commands.directions:
+def manual_move(direction = DirectionsCode.D_FORWARD):
+    if direction not in DirectionsCode:
         print("Moving {}".format(direction))
         return
 

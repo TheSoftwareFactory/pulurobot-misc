@@ -1,7 +1,10 @@
 // ========================================================================= Map
 // Possible options :
 //    zoom = true | false
+//    zoommin = number (in mm per pixel)
+//    zoommax = number (in mm per pixel)
 //    redraw = true | false
+//
 
 
 //  The shape of the robot, I'd like this to change promptly tho
@@ -33,7 +36,17 @@ var last_lidar_len = 0;
 var last_lidar;
 
 class RobotMap {
-  constructor(id = "map", options = { zoom: true, redraw: true}) {
+
+  static get default_options() {
+    return { zoom: true, redraw: true, zoommin: 1, zoommax: 25}
+  }
+
+  constructor(id = "map", options = { }) {
+
+    for(let key of Object.keys(RobotMap.default_options)) {
+      if(options[key] === undefined)  options[key] = RobotMap.default_options[key]
+    }
+
     this.wrapper = document.getElementById(id)
     this.canvas = document.createElement("canvas")
     this.canvas.setAttribute("style", "width:100%; box-shadow: 0 2px 5px 0px grey inset;")
@@ -59,6 +72,7 @@ class RobotMap {
     this.pos = new Vector2(0)
 
     this.world = new Map()
+    this.rendering = false
 
     this.canvas.onmousedown = (e) => {  this.onMouseDown(e);  }
     this.wrapper.onmouseup   = (e) => {  this.onMouseUp(e);    }
@@ -68,6 +82,8 @@ class RobotMap {
     // document.getElementById('redraw').onclick   = redraw;
     if(options.zoom)    this.createZoom()
     if(options.redraw)  this.createRedraw()
+    this.zoommax = options.zoommax
+    this.zoommin = options.zoommin
   }
 
   setRobotPosition(angle, x, y) {
@@ -107,8 +123,8 @@ class RobotMap {
     this._scale.setAttribute(
       "style",
       "display: inline-block; font-size: .6em; line-height: 1em; padding-bottom: 5px; margin: 0 8px; border-radius: 2px; border-bottom: 3px black solid; text-align: center")
-    this._scale.style.width = "40px"
-    this._scale.style.maxWidth = "40px"
+    this._scale.style.width = "50px"
+    this._scale.style.maxWidth = "50px"
     this.updateScale()
 
     this._zoomsElement.appendChild(zoomoutEl)
@@ -118,7 +134,7 @@ class RobotMap {
   }
 
   updateScale() {
-    let val = this.mm_per_pixel * 40
+    let val = this.mm_per_pixel * 50
     let s = ""
     if(val < 1)                       s = "1- mm"
     else if(val < 1000)               s = Math.round(val) + " mm"
@@ -148,7 +164,7 @@ class RobotMap {
     document.getElementById("direct_fwd").style.display = "block";
     document.getElementById("direct_back").style.display = "block";
     document.getElementById("rotate").style.display = "block";
-    this.draw_world()
+    // this.draw_world()
   }
 
   deactivate_click() {
@@ -157,7 +173,7 @@ class RobotMap {
     document.getElementById("direct_fwd").style.display = "none";
     document.getElementById("direct_back").style.display = "none";
     document.getElementById("rotate").style.display = "none";
-    this.draw_world()
+    // this.draw_world()
   }
 
   handle_click(x, y) {
@@ -193,25 +209,49 @@ class RobotMap {
   }
 
   zoom_in() {
-    let next_mpp =  this.mm_per_pixel * 1 - this._zoomFactorIn
-    if(next_mpp < 1)  return
-    this.mm_per_pixel *= 1 - this._zoomFactorIn
+    let next_mpp =  this.mm_per_pixel * (1 - this._zoomFactorIn)
+    if(next_mpp < this.zoommin)  return
+    this.mm_per_pixel = next_mpp
     this.mm_per_pixel = Math.round(this.mm_per_pixel*100000) / 100000
     this.context.clearRect(0,0, this.dimension.x, this.dimension.y)
-    this.draw_world()
+    // this.draw_world()
     this.updateScale()
   }
 
   zoom_out() {
-    this.mm_per_pixel *= 1 + this._zoomFactorOut
+    let next_mpp =  this.mm_per_pixel * (1 + this._zoomFactorOut)
+    if(next_mpp > this.zoommax)  return
+    this.mm_per_pixel = next_mpp
     this.mm_per_pixel = Math.round(this.mm_per_pixel*100000) / 100000
     this.context.clearRect(0,0, this.dimension.x, this.dimension.y)
-    this.draw_world()
+    // this.draw_world()
     this.updateScale()
   }
 
   changeTheWorld(world) {
     this.world = world
+  }
+
+  /**
+  * This ensure that you are not gonna redraw out of the blue. You'll redraw
+  * you'll redraw when the browser is ready.
+  * Plus, you don't need to refresh the drawings anywhere after calling this
+  */
+  startRender() {
+    this.rendering = true
+    let render = () => {
+      if(!this.rendering) return
+      this.draw_world()
+      requestAnimationFrame(() => { render() })
+    }
+    render()
+  }
+
+  /**
+  * If for some reason you need to stop the render of the map call this.
+  */
+  stopRender() {
+    this.rendering = false
   }
 
   /**
@@ -329,8 +369,8 @@ class RobotMap {
     // Below 5 pixels move, consider it as click
     if(drag.norm() < 5)
       this.handle_click(drag_end.x, drag_end.y)
-    else
-      this.draw_world()
+    // else
+    //   this.draw_world()
   }
 
   onMouseOut(e) {
@@ -344,7 +384,7 @@ class RobotMap {
     let drag = new Vector2(e.movementX, e.movementY)
 
     this.view_start.sub(drag.multiplyScalar(this.mm_per_pixel))
-
-    this.draw_world()
+    //
+    // this.draw_world()
   }
 }

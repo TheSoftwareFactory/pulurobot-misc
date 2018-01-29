@@ -49,6 +49,7 @@ let robotMap;
 // Create the map after the document is created
 $(function() {
   let robotMap = new RobotMap("map")
+  robotMap.startRender()
 })
 
 // /!\ NO VISUAL UPDATE IT'S A TRAP
@@ -121,29 +122,12 @@ function charger() {
     socket_di.send(db.toBlob());
 }
 
-function rn1host_restart() {
-    restart_msg(1);
-}
-
-function rn1host_quit() {
-    restart_msg(5);
-}
-
-function rn1host_update() {
-    restart_msg(6);
-}
-
-function rn1host_reflash() {
-    restart_msg(10);
-}
-
-function rn1host_reboot_raspi() {
-    restart_msg(135);
-}
-
-function rn1host_shdn_raspi() {
-    restart_msg(136);
-}
+function rn1host_restart() {    restart_msg(1); }
+function rn1host_quit() {       restart_msg(5); }
+function rn1host_update() {     restart_msg(6); }
+function rn1host_reflash() {    restart_msg(10);}
+function rn1host_reboot_raspi() {restart_msg(135);}
+function rn1host_shdn_raspi() { restart_msg(136); }
 
 // Wrappers for the html calls of manual commands
 function manu_fwd()   {   manu(MANUAL_COMMANDS.FORWARD);    }

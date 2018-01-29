@@ -1,0 +1,46 @@
+.overlay-top-left,
+.overlay-top-right,
+.overlay-top-left,
+.overlay-bottom-right {
+  position: absolute;
+  margin: 10px;
+  padding: 10px;
+  box-shadow: 0 0 3px 1px #99A;
+  background-color: rgba(220,220,255,0.1);
+  height: auto;
+  width: auto;
+  border-radius: 1px;
+}
+
+.overlay-top-left {
+  top: 0;
+  left: 0;
+}
+
+.overlay-top-right {
+  top: 0;
+  right: 0;
+}
+
+.overlay-bottom-left {
+  bottom: 0;
+  left: 0;
+}
+
+.overlay-bottom-right {
+  bottom: 0;
+  right: 0;
+}
+
+.clickable {
+  opacity: 1;
+  transition: .15s all;
+}
+
+.clickable:hover {
+  text-shadow: 1px 1px 2px #BBB;
+}
+
+.clickable:active {
+  opacity: .8;
+}

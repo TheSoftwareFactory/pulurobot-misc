@@ -38,7 +38,7 @@ var last_lidar;
 class RobotMap {
 
   static get default_options() {
-    return { zoom: true, redraw: true, zoommin: 1, zoommax: 25}
+    return { zoom: true, redraw: false, zoommin: 1, zoommax: 25}
   }
 
   constructor(id = "map", options = { }) {
@@ -188,7 +188,7 @@ class RobotMap {
       console.error("You must set a zoom factor above 0 (and not greater than 10)")
       return
     } else if (factor > 10) {
-      console.error("You must set a zoom factor with a reasonable scaling (below 10, 10 include)")
+      console.error("You must set a zoom factor with a reasonable scaling (below 10, 10 included)")
       return
     } else if(factor == 1) {
       console.warn("This is acceptable but zooming with a 1:1 ratio, is kinda useless...")

@@ -1,10 +1,46 @@
+// ================================================================ Some classes
+
+class RobotRoute {
+	constructor() {
+		this.start = new Vector2()
+		this.route = []
+	}
+
+	changeStart(x, y) {
+		this.start.x = x
+		this.start.y = y
+	}
+
+	addPoint(x, y, smthg) {
+		this.route.push({ coord: new Vector2(x, y), smthg: smthg})
+	}
+
+	get length() {
+		return this.route.length
+	}
+}
+
+class Lidar {
+	constructor() {
+		this.points = []
+	}
+
+	addPoint(x, y) {
+		this.points.push(new Vector2(x, y))
+	}
+
+	get length() {
+		return this.points.length
+	}
+}
+
 // ========================================================================= Map
 // Possible options :
 //    zoom = true | false
 //    zoommin = number (in mm per pixel)
 //    zoommax = number (in mm per pixel)
 //    redraw = true | false
-//
+//    details = true | false
 
 
 //  The shape of the robot, I'd like this to change promptly tho
@@ -18,7 +54,7 @@
 //    6-------------5
 //
 
-var robot_shape = [
+let robot_shape = [
     [-500, -240],
     [150, -240],
     [150, -100],
@@ -28,17 +64,10 @@ var robot_shape = [
     [-500, 240]
 ];
 
-var route_len = 0;
-var route_start = [];
-var route = [];
-
-var last_lidar_len = 0;
-var last_lidar;
-
 class RobotMap {
 
   static get default_options() {
-    return { zoom: true, redraw: false, zoommin: 1, zoommax: 25}
+    return { zoom: true, zoommin: 1, zoommax: 25, details: true, redraw: false}
   }
 
   constructor(id = "map", options = { }) {
@@ -48,6 +77,8 @@ class RobotMap {
     }
 
     this.wrapper = document.getElementById(id)
+    while (this.wrapper.lastChild) this.wrapper.removeChild(this.wrapper.lastChild)
+
     this.canvas = document.createElement("canvas")
     this.canvas.setAttribute("style", "width:100%; box-shadow: 0 2px 5px 0px grey inset;")
     this.canvas.setAttribute("width", 1000)
@@ -64,12 +95,15 @@ class RobotMap {
     this.zoomFactor = .85
 
     this.clicked = false
-    this.click_pos_mm = new Vector2(0)
+    this.click_pos_mm = new Vector2()
     this.dragging = false
-    this.drag_pos = new Vector2(0)
+    this.drag_pos = new Vector2()
 
     this.angle = 0
-    this.pos = new Vector2(0)
+    this.pos = new Vector2()
+
+    this.activeRoute  = new RobotRoute()
+    this.last_lidar   = new Lidar()
 
     this.world = new Map()
     this.rendering = false
@@ -82,14 +116,18 @@ class RobotMap {
     // document.getElementById('redraw').onclick   = redraw;
     if(options.zoom)    this.createZoom()
     if(options.redraw)  this.createRedraw()
+    if(options.details) this.createRobotDetails()
     this.zoommax = options.zoommax
     this.zoommin = options.zoommin
+
+    this.setRobotPosition(0,0,0)
   }
 
   setRobotPosition(angle, x, y) {
     this.pos.x = x
     this.pos.y = y
     this.angle = angle
+    this.updateRobotPosition()
   }
 
   get mm_start() {
@@ -133,7 +171,25 @@ class RobotMap {
     this.wrapper.appendChild(this._zoomsElement)
   }
 
+  createRobotDetails() {
+    if(this._robotDetailsEl)  return
+    this._robotDetailsEl = document.createElement("div")
+    this._robotDetailsEl.className = "overlay-bottom-right light-overlay"
+
+    this._pRobotCoordinatesEl = document.createElement("span")
+    this._robotDetailsEl.appendChild(this._pRobotCoordinatesEl)
+    this.wrapper.appendChild(this._robotDetailsEl)
+  }
+
+  updateRobotPosition() {
+    if(!this._pRobotCoordinatesEl)  return
+    this._pRobotCoordinatesEl.innerHTML = "<i>x: "+this.pos.x+"</i>"
+      + " - <i>y: "+this.pos.y+"</i>"
+      + " - <i>angle: "+Math.round(Angle.radToDeg(this.angle)*10)/10+"°</i>"
+  }
+
   updateScale() {
+    if(!this._scale)  return
     let val = this.mm_per_pixel * 50
     let s = ""
     if(val < 1)                       s = "1- mm"
@@ -151,20 +207,19 @@ class RobotMap {
     let redEl = document.createElement("i")
     redEl.className = "fa fa-refresh clickable"
     redEl.setAttribute("style", "font-size: 2em")
-    redEl.onclick = (e) => {  this.draw_world(); }
+    redEl.onclick = (e) => {  this.draw(); }
 
     this._redrawEl.appendChild(redEl)
     this.wrapper.appendChild(this._redrawEl)
   }
 
-  // Modify this to grant the possibility to have the two maps on the same page
+  // Modify this to grant the possibility to have two maps on the same page
   activate_click() {
     this.clicked = true
     document.getElementById("route").style.display = "block";
     document.getElementById("direct_fwd").style.display = "block";
     document.getElementById("direct_back").style.display = "block";
     document.getElementById("rotate").style.display = "block";
-    // this.draw_world()
   }
 
   deactivate_click() {
@@ -173,7 +228,6 @@ class RobotMap {
     document.getElementById("direct_fwd").style.display = "none";
     document.getElementById("direct_back").style.display = "none";
     document.getElementById("rotate").style.display = "none";
-    // this.draw_world()
   }
 
   handle_click(x, y) {
@@ -196,40 +250,41 @@ class RobotMap {
       this._zoomFactorOut = 0
     } else if(factor > 1) {
       // Above 1, set the out factor first
-      factor -= 1
       this._zoomFactorOut = factor
-      this._zoomFactorIn = factor/(factor+1)
+      this._zoomFactorIn = 1/(factor)
     } else {
       // Below 1 set the in factor first
-      console.log(1-factor)
-      factor = 1 - factor
       this._zoomFactorIn = factor
-      this._zoomFactorOut = factor/(1-factor)
+      this._zoomFactorOut = 1/(factor)
     }
   }
 
   zoom_in() {
-    let next_mpp =  this.mm_per_pixel * (1 - this._zoomFactorIn)
+    let next_mpp =  this.mm_per_pixel * this._zoomFactorIn
     if(next_mpp < this.zoommin)  return
     this.mm_per_pixel = next_mpp
     this.mm_per_pixel = Math.round(this.mm_per_pixel*100000) / 100000
     this.context.clearRect(0,0, this.dimension.x, this.dimension.y)
-    // this.draw_world()
+
     this.updateScale()
   }
 
   zoom_out() {
-    let next_mpp =  this.mm_per_pixel * (1 + this._zoomFactorOut)
+    let next_mpp =  this.mm_per_pixel * this._zoomFactorOut
     if(next_mpp > this.zoommax)  return
     this.mm_per_pixel = next_mpp
     this.mm_per_pixel = Math.round(this.mm_per_pixel*100000) / 100000
     this.context.clearRect(0,0, this.dimension.x, this.dimension.y)
-    // this.draw_world()
+
     this.updateScale()
   }
 
   changeTheWorld(world) {
     this.world = world
+  }
+
+  cleanseTheWorld() {
+    this.world = new Map()
   }
 
   /**
@@ -241,7 +296,7 @@ class RobotMap {
     this.rendering = true
     let render = () => {
       if(!this.rendering) return
-      this.draw_world()
+      this.draw()
       requestAnimationFrame(() => { render() })
     }
     render()
@@ -249,15 +304,16 @@ class RobotMap {
 
   /**
   * If for some reason you need to stop the render of the map call this.
+  * If you need to destroy the map, please, call this !
   */
   stopRender() {
     this.rendering = false
   }
 
   /**
-  * Draws the full world
+  * Draws the full world, the robot and other things
   */
-  draw_world() {
+  draw() {
     // Little trick to deal with resizing
     this.context.clearRect(0, 0, Math.max(this.dimension.x, 2000), Math.max(this.dimension.y, 2000))
 
@@ -283,7 +339,7 @@ class RobotMap {
 
     this.context.beginPath()
     this.context.moveTo(robot_shape[0][0] / this.mm_per_pixel, robot_shape[0][1] / this.mm_per_pixel);
-    for (var i = 0; i < 7; i++) {
+    for (let i = 0; i < 7; i++) {
         this.context.lineTo(robot_shape[i][0] / this.mm_per_pixel, robot_shape[i][1] / this.mm_per_pixel);
     }
     this.context.closePath();
@@ -293,46 +349,50 @@ class RobotMap {
     this.context.restore();
 
     // Draw the route
-
-    if (route_len > 0) {
+    let len = this.activeRoute.length
+    if (len > 0) {
 
         this.context.beginPath();
         this.context.lineJoin = "round"
         this.context.lineCap = "round"
         this.context.moveTo(
-          (route_start[0] - this.view_start.x) / this.mm_per_pixel,
-          (route_start[1] - this.view_start.y) / this.mm_per_pixel);
-        for (i = 0; i < route_len; i++) {
+          (this.activeRoute.start.x - this.view_start.x) / this.mm_per_pixel,
+          (this.activeRoute.start.y - this.view_start.y) / this.mm_per_pixel);
+        for (let i = 0; i < len; i++) {
+            let point = this.activeRoute.route[i]
             this.context.lineWidth = 3;
-            if (route[i][2] > 0)
-                this.context.strokeStyle = "#C00000B0";
+            if (point.smthg > 0)
+                this.context.strokeStyle = "#C00000B0"; //transparent red
             else
-                this.context.strokeStyle = "#00C030B0";
+                this.context.strokeStyle = "#00C030B0"; // transparent green
 
             this.context.lineTo(
-              (route[i][0] - this.view_start.x) / this.mm_per_pixel,
-              (route[i][1] - this.view_start.y) / this.mm_per_pixel);
+              (point.coord.x - this.view_start.x) / this.mm_per_pixel,
+              (point.coord.y - this.view_start.y) / this.mm_per_pixel);
             this.context.stroke();
-            if (i < route_len - 1) {
+            // This is questionnable tho
+            if (i != len - 1) {
                 this.context.beginPath();
                 this.context.moveTo(
-                  (route[i][0] - this.view_start.x) / this.mm_per_pixel,
-                  (route[i][1] - this.view_start.y) / this.mm_per_pixel);
+                  (point.coord.x - this.view_start.x) / this.mm_per_pixel,
+                  (point.coord.y - this.view_start.y) / this.mm_per_pixel);
             }
         }
     }
 
-    // Draws smthg that I not yet figured out
+    // Draws the last obstacles detected
 
-    for (i = 0; i < last_lidar_len; i++) {
+    for (let i = 0; i < this.last_lidar.length; i++) {
         this.context.fillStyle = "red";
         this.context.fillRect(
-          (last_lidar[i][0] - this.view_start.x) / this.mm_per_pixel - 1,
-          (last_lidar[i][1] - this.view_start.y) / this.mm_per_pixel - 1, 2, 2);
+          (this.last_lidar.points[i].x - this.view_start.x) / this.mm_per_pixel - 1,
+          (this.last_lidar.points[i].y - this.view_start.y) / this.mm_per_pixel - 1,
+          2, 2);
     }
 
     if (this.clicked) {
-
+      this.context.lineJoin = "round"
+      this.context.lineCap = "round"
         this.context.fillStyle = "#FF7090C0";
         this.context.fillRect(
           (this.click_pos_mm.x - this.view_start.x) / this.mm_per_pixel - 5,
@@ -370,7 +430,7 @@ class RobotMap {
     if(drag.norm() < 5)
       this.handle_click(drag_end.x, drag_end.y)
     // else
-    //   this.draw_world()
+    //   this.draw()
   }
 
   onMouseOut(e) {
@@ -385,6 +445,6 @@ class RobotMap {
 
     this.view_start.sub(drag.multiplyScalar(this.mm_per_pixel))
     //
-    // this.draw_world()
+
   }
 }

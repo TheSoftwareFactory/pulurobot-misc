@@ -5,8 +5,8 @@
   position: absolute;
   margin: 10px;
   padding: 10px;
-  box-shadow: 0 0 3px 1px #99A;
-  background-color: rgba(220,220,255,0.1);
+  box-shadow: 0px 0px 1px 1px #CCC;
+  background-color: rgba(220,220,255,0.2);
   height: auto;
   width: auto;
   border-radius: 1px;
@@ -30,6 +30,12 @@
 .overlay-bottom-right {
   bottom: 0;
   right: 0;
+}
+
+.light-overlay {
+  box-shadow: 0 0px 2px 0px rgba(255,255,255,0.2);
+  background-color: rgba(255,255,255,0.2);
+  border-radius: 2px;
 }
 
 .clickable {

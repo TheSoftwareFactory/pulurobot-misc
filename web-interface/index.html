@@ -137,6 +137,8 @@
                               <hr/>
                               <input class="btn btn-info btn-block" type=button id=charger value="Go to charger">
                               <input class="btn btn-danger btn-block" type=button id=estop value="STOP!!!">
+
+                              <input class="btn btn-info btn-block" type=button id=update_view value="Update view">
                            </div>
                         </div>
                         <div class="col-sm-12">
@@ -146,7 +148,7 @@
                                  <p>
                                    <i class="fa fa-battery" aria-hidden="true"></i>
                                    <span>Battery status: </span>
-                                   <strong id=bat_status>n/a Volts - n/a %</strong>
+                                   <strong id=bat_status>n/a V - n/a V<i class='small'>in</i> - n/a %</strong>
                                    <br/>
                                    <i class="fa fa-exchange" aria-hidden="true"></i>
                                    <span>Status: </span>
@@ -292,6 +294,7 @@
                   </div>
                   <script src="js/util.js"></script>
                   <script src="js/robotmap.js"></script>
+                  <script src="js/controller.js"></script>
                   <script src="js/main-es6.js"></script>
 
                   <script src="assets/js/vendor/jquery-2.1.4.min.js"></script>
@@ -314,6 +317,8 @@
                      document.getElementById('manu_back').onclick = manu_back;
                      document.getElementById('manu_left').onclick = manu_left;
                      document.getElementById('manu_right').onclick = manu_right;
+
+                     document.getElementById('update_view').onclick = update_view
 
                      document.getElementById('route').onclick = do_route;
                      document.getElementById('direct_fwd').onclick = do_direct_fwd;

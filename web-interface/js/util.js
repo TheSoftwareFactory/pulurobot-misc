@@ -145,23 +145,59 @@ class DataBuffer {
   }
 }
 
-/**
-* Sanitize string to avoid js injection
-*/
-function sanitize(s) {
-  return html_sanitize(s, function(url){return url;}, function(id){return id;})
+class Angle {
+  constructor() {}
+  static radToDeg(val) {
+    return val * 180 / Math.PI
+  }
+  static degToRad(val) {
+    return val * Math.PI / 180
+  }
+  static numericToRad(val, bits) {
+    return val / (1<<bits) * 2 * Math.PI
+  }
+  static numericToDeg(val, bits) {
+    return val / (1<<bits) * 360
+  }
 }
 
-/**
-* Encapsulate a websocket creation to paliate to Gecko 6 - 10
-*/
-function createWebSocket(url, protocol) {
-  // Gecko 6 to 10 check where WebSocket is defined for another purpose
-  if ("MozWebSocket" in window) {
-      return new MozWebSocket(url, protocol);
-  } else if ("WebSocket" in window) {
-      return new WebSocket(url, protocol);
-  } else {
-    console.error("Websockets not supported by this browser")
+class Util {
+  /**
+  * Sanitize string to avoid js injection
+  */
+  static sanitize(s) {
+    return html_sanitize(s, function(url){return url;}, function(id){return id;})
+  }
+
+  static get_appropriate_ws_url(localhost = false) {
+    let pcol;
+  	let u = document.URL;
+
+  	// What interest us right there is the "s" for security
+  	if (u.substring(0, 5) == "https") {
+  		pcol = "wss://";
+  		u = u.substr(8);
+  	} else {
+  		pcol = "ws://";
+  		if (u.substring(0, 4) == "http")
+  			u = u.substr(7);
+  	}
+
+  	if (localhost) return "ws://localhost:44444";
+  	return pcol + u.split('/')[0] + "/xxx";
+  }
+
+  /**
+  * Encapsulate a websocket creation to paliate to Gecko 6 - 10
+  */
+  static createWebSocket(url, protocol) {
+    // Gecko 6 to 10 check where WebSocket is defined for another purpose
+    if ("MozWebSocket" in window) {
+        return new MozWebSocket(url, protocol);
+    } else if ("WebSocket" in window) {
+        return new WebSocket(url, protocol);
+    } else {
+      console.error("Websockets not supported by this browser")
+    }
   }
 }

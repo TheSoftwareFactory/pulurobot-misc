@@ -3,6 +3,9 @@ let robotMap;
 let robotController;
 
 // ==================================== Function exposed for the sake of binding
+// For more details on the use of these functions you can check
+// in the controller.js file
+
 // /!\ NO VISUAL UPDATE IT'S A TRAP
 function update_view() {
 	robotController.updateView(
@@ -79,6 +82,10 @@ function mode6() {  mode(6);  }
 function mode7() {  mode(7);  }
 
 // ============================================================= Start the stuff
+// It's kept enclosed, so the only thing exposed to the page are the bindings of
+// the buttons (above), classes, constants definitions
+// and robotController/robotMap making it easier to deal with when using
+// the console and keeping the window object clean
 
 // Create the map after the document is created
 $(function() {
@@ -86,24 +93,44 @@ $(function() {
 	robotController = new RobotController()
 
 	// Initialize socket handlers
+	let cardElementJQ = $("#wsdi_card_status")
+	let statusElement = document.getElementById("wsdi_status")
+	let removeBackground = function(element) {
+		element.removeClass("bg-flat-color-5 bg-flat-color-4 bg-flat-color-3 bg-flat-color-2 bg-flat-color-1")
+		return element
+	}
+
 	robotController.onSocketOpen = () => {
-		document.getElementById("wsdi_status")
-			.innerHTML = "opened " + Util.sanitize(robotController.socket.extensions);
-		document.getElementById("wsdi_status").textContent = "opened";
-		$("#wsdi_card_status").removeClass("bg-flat-color-5 bg-flat-color-4 bg-flat-color-3 bg-flat-color-2 bg-flat-color-1");
-		$("#wsdi_card_status").addClass("bg-flat-color-5");
+	 	while (statusElement.lastChild) statusElement.removeChild(statusElement.lastChild)
+		statusElement
+			.innerHTML = "opened "
+			+ '<br/><i class="fa fa-plug" aria-hidden="true"></i>'
+			+ "<div class='small' style='font-style:italic'>("
+				+ Util.sanitize(robotController.socket.extensions)
+				+ ")</div>"
+		removeBackground(cardElementJQ).addClass("bg-flat-color-5");
 	}
+
+	let oldSocketClose = robotController.onSocketClose
 	robotController.onSocketClose = (event) => {
-		document.getElementById("wsdi_status").textContent = "closed (Error: " + event.code + ")";
-		$("#wsdi_card_status").removeClass("bg-flat-color-5 bg-flat-color-4 bg-flat-color-3 bg-flat-color-2 bg-flat-color-1");
-		$("#wsdi_card_status").addClass("bg-flat-color-4");
+		oldSocketClose(event)
+		if(event.code != 1000)
+			statusElement.innerHTML = "closed (Error: " + event.code + ")" + '<br/><i class="fa fa-times" aria-hidden="true"></i>'
+		else
+			statusElement.innerHTML = "closed" + '<br/><i class="fa fa-times" aria-hidden="true"></i>'
+		removeBackground(cardElementJQ).addClass("bg-flat-color-4");
 	}
+
 	robotController.onSocketError = (error) => {
 		console.warn("Unable to connect");
-		document.getElementById("wsdi_status").textContent = "closed (Error)";
-		$("#wsdi_card_status").removeClass("bg-flat-color-5 bg-flat-color-4 bg-flat-color-3 bg-flat-color-2 bg-flat-color-1");
-		$("#wsdi_card_status").addClass("bg-flat-color-4");
+		statusElement.innerHTML = "closed (Error)" + '<br/><i class="fa fa-times" aria-hidden="true"></i>'
+		removeBackground(cardElementJQ).addClass("bg-flat-color-4");
 	}
+
+	robotController.onUrlChange = (url) => {
+		document.getElementById("ws_url").textContent = url;
+	}
+	robotController.url = robotController.url	//Create the call to onUrlChange
 
 	// Initialize controller callbacks
 	robotController.onWorldRetrieve = (world) => {
@@ -128,7 +155,11 @@ $(function() {
 	robotController.onLastLidarRetrieve = (lidar, robot_angle) => {
 		robotMap.last_lidar = lidar
 	}
-	document.getElementById("ws_url").textContent = Util.get_appropriate_ws_url(true);
+
+	// Make sure to close the socket when you leave the page
+	window.addEventListener("beforeunload", function (event) {
+	  robotController.endConnection()
+	})
 
 	// Start the stuff
 	robotMap.startRender()
@@ -139,3 +170,4 @@ $(function() {
 // robot. It was in the previous version but the clean up made disappear
 // as the map is now just a visual for a view
 // Next up, adding the possibility to rebind these functions
+// You can still manually update the view with the button on the right of the map tho

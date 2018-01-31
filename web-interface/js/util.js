@@ -117,14 +117,14 @@ class DataBuffer {
 
   // This is tricky, it assumes that in the name of the type, you have the
   // number of bits and multiple of 8 (which is true according to the doc)
-  sizeOf(type) {
+  static sizeOf(type) {
     return (+(type.replace(/\D/g,'')) / 8)
   }
 
   append(type, value, LittleEndian = false) {
     type = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase()
-    let s = this.sizeOf(type)
-    this.array.push({size:this.sizeOf(type),type:type, value:value, LittleEndian:LittleEndian})
+    let s = DataBuffer.sizeOf(type)
+    this.array.push({size:s,type:type, value:value, LittleEndian:LittleEndian})
     this.length += s
     return this;
   }
@@ -145,6 +145,9 @@ class DataBuffer {
   }
 }
 
+/**
+* Some tools to convert degree, radian and interval of values between them
+*/
 class Angle {
   constructor() {}
   static radToDeg(val) {
@@ -161,6 +164,9 @@ class Angle {
   }
 }
 
+/**
+* Random function, uncategorized
+*/
 class Util {
   /**
   * Sanitize string to avoid js injection
@@ -169,6 +175,10 @@ class Util {
     return html_sanitize(s, function(url){return url;}, function(id){return id;})
   }
 
+  /**
+  * Probably the weirdest tool in the box
+  * It converts the url with http(s) protocols in one using ws(s) protocols
+  */
   static get_appropriate_ws_url(localhost = false) {
     let pcol;
   	let u = document.URL;
@@ -183,7 +193,7 @@ class Util {
   			u = u.substr(7);
   	}
 
-  	if (localhost) return "ws://localhost:44444";
+  	if (localhost) return "ws://ojabotti.ha.fi:23456/xxx";
   	return pcol + u.split('/')[0] + "/xxx";
   }
 

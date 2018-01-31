@@ -53,19 +53,31 @@ class RobotController {
 
   constructor() {
     this.socket = null
-    this.createRetrieveCallbacks()
+    this._createRetrieveCallbacks()
     this.onSocketOpen = () => {}
     this.onSocketError = (error) => { console.warn("Unable to connect (Error)") }
+		this.onUrlChange = () => {}
+		this._url = Util.get_appropriate_ws_url(true) || ""
   }
 
+	set url(url) {
+		this._url = url
+		this.onUrlChange(url)
+	}
+
+	get url() {	return this._url || ""	}
+
+	/**
+	* Call it after you have set all the handlers and the proper url, it will
+	* open the socket connection
+	*/
   startConnection() {
-    let _url = Util.get_appropriate_ws_url(true)
-    this.socket = Util.createWebSocket(_url, "rn1-protocol")
+    this.socket = Util.createWebSocket(this._url, "rn1-protocol")
     this.socket.onopen = ()=> {
       this.onSocketOpen()
     }
     this.socket.onmessage = (msg) => {
-      this.onMessage(msg)
+      this._onMessage(msg)
     }
     this.socket.onerror = (error) => {
       this.onSocketError(error)
@@ -75,12 +87,15 @@ class RobotController {
     }
   }
 
+	/**
+	* Close the socket when you need it
+	*/
   endConnection(msg = "Closed on purpose by the controller") {
     if(!this.socket)  return
     this.socket.close(1000, msg)
   }
 
-  send(databuffer) {
+  _send(databuffer) {
     if (this.socket.readyState == this.socket.CLOSED) {
       console.warn("This socket is CLOSED")
     } else if (this.socket.readyState == this.socket.CLOSING) {
@@ -106,7 +121,7 @@ class RobotController {
       .append("Int32", end.x)
       .append("Int32", end.y)
 
-    this.send(db)
+    this._send(db)
     if(callback)  callback()
   }
 
@@ -122,7 +137,7 @@ class RobotController {
       .append("Int32", target.y)
       .append("Uint8", 0)
 
-    this.send(db)
+    this._send(db)
     if(callback)  callback()
   }
 
@@ -142,7 +157,7 @@ class RobotController {
       .append("Int32", target.y)
       .append("Uint8", command)
 
-    this.send(db)
+    this._send(db)
     if(callback)  callback()
   }
 
@@ -154,9 +169,9 @@ class RobotController {
     let db = new DataBuffer()
 
   	db.append("Uint8", COMMANDS_CODE.RESTART)
-  		.append("Uint8", m)
+  		.append("Uint8", type)
 
-    this.send(db)
+    this._send(db)
     if(callback)  callback()
   }
 
@@ -170,7 +185,7 @@ class RobotController {
     db.append("Uint8", COMMANDS_CODE.MODE_CHANGE)
       .append("Uint8", mode);
 
-    this.send(db)
+    this._send(db)
     if(callback)  callback()
   }
 
@@ -181,10 +196,10 @@ class RobotController {
   manualCommand(command, callback) {
     let db = new DataBuffer()
 
-    db.append("Uint8", COMMANDS.MANUAL_COMMAND)
+    db.append("Uint8", COMMANDS_CODE.MANUAL_COMMAND)
       .append("Uint8", command)
 
-    this.send(db)
+    this._send(db)
     if(callback)  callback()
   }
 
@@ -194,9 +209,9 @@ class RobotController {
   charger(callback) {
     let db = new DataBuffer()
 
-    db.append("Uint8", COMMANDS.CHARGER)
+    db.append("Uint8", COMMANDS_CODE.CHARGER)
 
-    this.send(db)
+    this._send(db)
     if(callback)  callback()
   }
 
@@ -206,16 +221,16 @@ class RobotController {
   deleteMaps(callback) {
     let db = new DataBuffer()
 
-    db.append("Uint8", COMMANDS.DEL_MAPS)
+    db.append("Uint8", COMMANDS_CODE.DEL_MAPS)
 
-    this.send(db)
+    this._send(db)
     if(callback)  callback()
   }
 
 
   // RECEPTION
 
-  onMessage(msg) {
+  _onMessage(msg) {
     if(msg.data instanceof Blob) {
       let fileReader = new FileReader()
 
@@ -250,7 +265,7 @@ class RobotController {
     }
   }
 
-  createRetrieveCallbacks() {
+  _createRetrieveCallbacks() {
       this.onWorldRetrieve = () => {}
       this.onPositionRetrieve = () => {}
       this.onChargingStateRetrieve = () => {}
@@ -372,7 +387,7 @@ class RobotController {
     let reason;
 
     if (event.code == 1000)
-      reason = "Normal closure, meaning that the purpose for which the connection was established has been fulfilled.";
+      reason = "Normal closure.";
     else if (event.code == 1001)
       reason = "An endpoint is \"going away\", such as a server going down or a browser having navigated away from a page.";
     else if (event.code == 1002)

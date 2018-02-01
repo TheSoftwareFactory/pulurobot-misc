@@ -41,6 +41,8 @@ class Lidar {
 //    zoommax = number (in mm per pixel)
 //    redraw = true | false
 //    details = true | false
+//		ratio = number
+// 		width = number (in px)
 
 
 //  The shape of the robot, I'd like this to change promptly tho
@@ -67,7 +69,7 @@ let robot_shape = [
 class RobotMap {
 
   static get default_options() {
-    return { zoom: true, zoommin: 1, zoommax: 25, details: true, redraw: false}
+    return { zoom: true, zoommin: 1, zoommax: 25, details: true, redraw: false, ratio: 4/3, width: 1000 }
   }
 
   constructor(id = "map", options = { }) {
@@ -81,8 +83,8 @@ class RobotMap {
 
     this.canvas = document.createElement("canvas")
     this.canvas.setAttribute("style", "width:100%; box-shadow: 0 2px 5px 0px grey inset;")
-    this.canvas.setAttribute("width", 1000)
-    this.canvas.setAttribute("height", 750)
+    this.canvas.setAttribute("width", options.width)
+    this.canvas.setAttribute("height", options.width / options.ratio)
     this.wrapper.appendChild(this.canvas)
     this.context = this.canvas.getContext("2d")
 

@@ -1,0 +1,27 @@
+<div id="map">
+  <canvas #canvas (window:resize)="onResize()"
+     width="1000"
+     height="800"
+     style="width:100%; box-shadow: 0 2px 5px 0px grey inset;"
+     (mousedown)="onMouseDown($event)"
+     (mouseup)="onMouseUp($event)"
+     (mouseleave)="onMouseOut($event)"
+     (mousemove)="onMouseMove($event)">
+   </canvas>
+   <!--  Redraw -->
+   <div *ngIf="options.redraw" class="overlay-top-left">
+     <i class="fa fa-refresh clickable" (click)="_draw()"></i>
+   </div>
+   <!--  Zoom -->
+   <div *ngIf="options.zoom" class="overlay-top-right">
+     <i (click)="zoomIn()"   class="fa fa-minus-square clickable zoom-button"></i>
+     <div class="scale">{{scaleText}}</div>
+     <i (click)="zoomOut()"  class="fa fa-plus-square clickable zoom-button"></i>
+   </div>
+   <!--  Position details -->
+   <div *ngIf="options.details" class="overlay-bottom-right light-overlay">
+       <i>x: {{pos.x}}</i> -
+       <i>y: {{pos.y}}</i> -
+       <i>angle: {{robotAngle}}</i> -
+   </div>
+</div>

@@ -1,0 +1,33 @@
+<div class="row" id="map-section">
+   <div class="col-sm-12 col-md-10 pr-0">
+     <robotmap></robotmap>
+   </div>
+   <div class="col-sm-12 col-md-2">
+      <div id="wsdi_card_status" class="card text-white bg-flat-color-2 mb-1" style="transition: .2s all">
+         <div class="card-body p-2 pb-0">
+            <h4 class="mb-0">
+               <span>Connection State</span>
+            </h4>
+            <p class="text-light text-center" id="wsdi_status">
+              Initializing ...<br/>
+              <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
+            </p>
+         </div>
+      </div>
+
+      <!--  GOTTA REMOVE THIS FROM THERE -->
+      <input class="btn btn-info btn-block btn-sm" type=button id=route value="Route there" style="display:none">
+      <input class="btn btn-info btn-block btn-sm" type=button id=direct_fwd value="Direct forward" style="display:none">
+      <input class="btn btn-info btn-block btn-sm" type=button id=direct_back value="Direct reverse" style="display:none">
+      <input class="btn btn-info btn-block btn-sm" type=button id=rotate value="Rotate towards" style="display:none">
+      <hr/>
+      <input class="btn btn-info btn-block btn-sm" type=button id=charger value="Go to charger">
+      <input class="btn btn-info btn-block btn-sm" type=button id=update_view value="Update view">
+      <button class="btn btn-danger btn-block btn-sm" id=estop>
+        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+        STOP
+        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+      </button>
+      <!--  YUP ALL OF THIS HAS TO MOVE -->
+   </div>
+</div>

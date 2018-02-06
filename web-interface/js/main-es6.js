@@ -29,10 +29,6 @@ function do_dest(direction) {
 		)
 }
 
-function restart_msg(mode) {
-	robotController.softwareMessages(mode)
-}
-
 function mode(command) {
 	robotController.changeMode(command)
 }
@@ -57,13 +53,6 @@ function do_del_maps() {
 function do_direct_fwd() {  do_dest(0); }
 function do_direct_back() { do_dest(1); }
 function do_rotate() {      do_dest(8); }
-
-function rn1host_restart() {    restart_msg(1); }
-function rn1host_quit() {       restart_msg(5); }
-function rn1host_update() {     restart_msg(6); }
-function rn1host_reflash() {    restart_msg(10);}
-function rn1host_reboot_raspi() {restart_msg(135);}
-function rn1host_shdn_raspi() { restart_msg(136); }
 
 // Wrappers for the html calls of manual commands
 function manu_fwd()   {   manu(MANUAL_COMMANDS.FORWARD);    }

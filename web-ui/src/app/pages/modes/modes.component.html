@@ -1,0 +1,73 @@
+<!--  ROBOT MODES -->
+<div class="card row" id="modes-section">
+   <div class="card-body">
+      <div class="row">
+         <div class="col-sm-4">
+            <h4 class="card-title mb-0">Robot modes</h4>
+            <div class="small text-muted">Clicking one toggle off the others</div>
+         </div>
+      </div>
+      <div class="row mt-4">
+         <div class="col-sm-6 col-md-6">
+            <button class="btn btn-info btn-block"  id=mode1>
+              User control, with localization/mapping
+            </button>
+            <p>Normal operation mode. Stops autonomous decisions.</p>
+         </div>
+         <div class="col-sm-6 col-md-6">
+            <button class="btn btn-info btn-block"  id=mode2>
+              Autonomous mapping, skip compass
+            </button>
+            <p>Make the robot decide where to go.</p>
+         </div>
+         <div class="col-sm-6 col-md-6">
+            <button class="btn btn-info btn-block"  id=mode5>
+              Motors disabled, with localization/mapping
+            </button>
+            <p>Lets you move the robot freely.</p>
+         </div>
+         <div class="col-sm-6 col-md-6">
+            <button class="btn btn-info btn-block"  id=mode6>
+              Motors disabled, NO localization/mapping
+            </button>
+            <p>Does not mess up the map if the robot is wrongly localized.</p>
+         </div>
+      </div>
+      <hr/>
+      <h6>Secondary modes</h6>
+      <div class="row mt-4">
+         <div class="col-sm-6 col-md-4">
+            <button class="btn btn-info btn-sm btn-block"  id=mode0>
+              User control, NO localization/mapping
+            </button>
+            <p>Take the total control of what happens.</p>
+         </div>
+         <div class="col-sm-6 col-md-4">
+            <button class="btn btn-info btn-sm btn-block"  id=mode3>
+              Autonom. mapping, start from compass
+            </button>
+            <p> Use this to localize the robot on the map. Let it run for a while, until localized..</p>
+         </div>
+         <div class="col-sm-6 col-md-4">
+            <button class="btn btn-info btn-sm btn-block"  id=mode4>
+              DaijuMode
+            </button>
+            <p>Daiju</p>
+         </div>
+      </div>
+      <hr/>
+      <h6>Charger</h6>
+      <div class="row mt-4">
+         <div class="col-sm-6">
+            <button class="btn btn-outline-secondary btn-block btn-lg"  id=mode7>
+              Program charger location
+            </button>
+         </div>
+         <div class="col-sm-6">
+            <p>
+               Click this after you have put the robot IN the charger, do this once, or everytime the charger is moved.
+            </p>
+         </div>
+      </div>
+   </div>
+</div>

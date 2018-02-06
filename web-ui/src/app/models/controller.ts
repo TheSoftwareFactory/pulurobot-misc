@@ -69,7 +69,7 @@ export class RobotController {
 		this.onUrlChange(url)
 	}
 
-	get url() {	return this._url || ""	}
+	get url() {	return this._url || "..."	}
 
 	/**
 	* Call it after you have set all the handlers and the proper url, it will
@@ -98,6 +98,24 @@ export class RobotController {
     if(!this._socket)  return
     this._socket.close(1000, msg)
   }
+
+  // Ready states
+
+	isConnecting(): boolean {
+		return this._socket && this._socket.readyState == WebSocket.CONNECTING
+	}
+
+	isOpen(): boolean {
+		return this._socket && this._socket.readyState == WebSocket.OPEN
+	}
+
+	isClosing(): boolean {
+		return this._socket && this._socket.readyState == WebSocket.CLOSING
+	}
+
+	isClosed(): boolean {
+		return !this._socket || this._socket.readyState == WebSocket.CLOSED
+	}
 
   private _send(databuffer) {
     if (this._socket.readyState == this._socket.CLOSED) {

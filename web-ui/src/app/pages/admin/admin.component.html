@@ -1,3 +1,55 @@
-<p>
-  admin works!
-</p>
+<!--  ROBOT SOFTWARE MANIPULATION -->
+<div class="card row" id="soft-section">
+   <div class="card-body">
+      <div class="row">
+         <div class="col-lg-4">
+            <h4 class="mb-3">Software manipulations</h4>
+            <button
+              class="btn btn-warning btn-sm btn-block"
+              (click)="rn1hostRestart()">
+              Restart rn1host
+            </button>
+            <p>Restarts the robot raspi software</p>
+            <button
+              class="btn btn-warning btn-sm btn-block"
+              (click)="rn1hostUpdate()">
+              Update rn1host from github
+            </button>
+            <p>Quits, does a git pull, compiles, and restarts the robot raspi software.</p>
+            <button
+              class="btn btn-danger btn-sm btn-block"
+              (click)="rn1hostQuit()">Quit rn1host
+            </button>
+            <p>Quits the robot raspi software. You need to manually restart it via ssh, or reboot the robot to get it run again.</p>
+         </div>
+         <div class="col-lg-4">
+            <h4 class="mb-3">Flash</h4>
+            <button
+              class="btn btn-warning btn-sm btn-block"
+              (click)="rn1hostReflash()">
+              Update firmware(s)
+            </button>
+            <ul>
+              <li>Place the firmware file(s) on the robot raspi filesystem, in
+                 <i>/home/hrst/rn1&#8209;tools/main.bin</i> or <i>motcon.bin</i>, then run this.
+              </li>
+              <li>Reflashes &amp; restarts.</li>
+              <li>Creates a log file at <i>rn1&#8209;tools/program_log.txt</i></li>
+            </ul>
+         </div>
+         <div class="col-lg-4">
+            <h4 class="mb-3">Boot &amp; reboot</h4>
+            <button
+              class="btn btn-warning btn-sm btn-block"
+              (click)="rn1hostRebootRaspi()">Reboot the robot computer</button>
+            <p>Runs <i>shutdown -r now</i> on the robot Raspi</p>
+            <button
+              class="btn btn-danger btn-sm btn-block"
+              (click)="rn1rn1hostShutdownRaspi()">
+              Shutdown the robot computer
+            </button>
+            <p>Runs <i>shutdown -h now</i> on the robot Raspi - do this before switching off the power to avoid filesystem corruption.</p>
+         </div>
+      </div>
+   </div>
+</div>

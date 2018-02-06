@@ -8,7 +8,9 @@ export class ControllerService {
 
   private controller: RobotController;
 
-  constructor() { }
+  constructor() {
+    this.controller = new RobotController()
+  }
 
   startConnection() {
     this.controller.startConnection()
@@ -17,6 +19,18 @@ export class ControllerService {
   endConnection() {
     this.controller.endConnection()
   }
+
+  //
+
+  isConnecting(): boolean  {  return this.controller.isConnecting() }
+  isOpen(): boolean        {  return this.controller.isOpen()       }
+  isClosing(): boolean     {  return this.controller.isClosing()    }
+  isClosed(): boolean      {  return this.controller.isClosed()     }
+
+  //
+
+  get url() : string    {   return this.controller.url }
+  set url(url: string)  {   this.controller.url = url   }
 
   // Commands
 

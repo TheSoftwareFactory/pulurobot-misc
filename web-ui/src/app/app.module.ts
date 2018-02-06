@@ -11,6 +11,10 @@ import { RobotmapComponent } from './components/robotmap/robotmap.component';
 
 import { AdminComponent } from './pages/admin/admin.component';
 import { MapComponent } from './pages/map/map.component';
+import { ModesComponent } from './pages/modes/modes.component';
+
+import { ControllerService }	from "./providers/controller/controller.service";
+
 
 export const routes: Routes = [
 	{
@@ -18,6 +22,9 @@ export const routes: Routes = [
 	},
 	{
 		path: 'map', component: MapComponent
+	},
+	{
+		path: 'modes', component: ModesComponent
 	},
 	{
 		path: '', component: MapComponent
@@ -32,13 +39,17 @@ export const routes: Routes = [
     AppComponent,
     RobotmapComponent,
     AdminComponent,
-    MapComponent
+    MapComponent,
+    ModesComponent
   ],
   imports: [
     BrowserModule,
 		RouterModule.forRoot(routes)
   ],
-  providers: [],
+  providers: [
+		ControllerService
+	],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}

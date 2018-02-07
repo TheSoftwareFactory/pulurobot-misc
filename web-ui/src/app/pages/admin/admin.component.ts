@@ -13,6 +13,10 @@ export class AdminComponent implements OnInit {
   name: string;
   pass: string;
 
+  get history() {
+    return this.controllerServ.history
+  }
+
   constructor(
     private controllerServ: ControllerService,
     private authServ: AuthService
@@ -23,7 +27,6 @@ export class AdminComponent implements OnInit {
 
   login() {
     this.authServ.login( this.name, this.pass )
-    console.log(this.name, this.pass,this.authServ )
   }
 
   logged(): boolean {

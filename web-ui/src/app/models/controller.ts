@@ -47,8 +47,11 @@ export class ControllerHistoryLine {
 	command: number;
 	payload: DataBuffer;
 	constructor(public sent: boolean, data: DataBuffer) {
-		this.command = data.array[0].value
+		let c = data.array.shift()
+		this.command = c.value
+		data.length -= c.size
 		this.date = new Date()
+		this.payload = data
 	}
 }
 export class ControllerHistory {
@@ -58,8 +61,7 @@ export class ControllerHistory {
 	pushInHistory(sent: boolean, data: DataBuffer) {
 		let line = new ControllerHistoryLine(sent, data)
 		this.history.push(line)
-		if(this.history.length > this.maxHistory)
-			this.history.shift()
+		while(this.history.length > this.maxHistory)	this.history.shift()
 		console.log(this)
 	}
 }
@@ -77,7 +79,38 @@ export class RobotController {
 
 	public robot: Robot
 
-  constructor() {}
+  constructor() {
+	}
+
+	private historyTest() {
+		let db = new DataBuffer()
+		db.append("Uint8", CommandCode.MANUAL_COMMAND)
+			.append("Uint8", Math.round(Math.random()*8))
+		this._history.pushInHistory(true, db)
+
+		db = new DataBuffer()
+		db.append("Uint8", CommandCode.MANUAL_COMMAND)
+			.append("Uint8", Math.round(Math.random()*8))
+		this._history.pushInHistory(true, db)
+
+		db = new DataBuffer()
+		db.append("Uint8", ReceptionCode.CURRENT_POSITION)
+			.append("Int8", 8)
+			.append("Int16", 16)
+			.append("Int32", 32)
+			.append("Int64", 64)
+		this._history.pushInHistory(false, db)
+
+		db = new DataBuffer()
+		db.append("Uint8", CommandCode.MANUAL_COMMAND)
+			.append("Uint8", Math.round(Math.random()*8))
+		this._history.pushInHistory(true, db)
+
+		db = new DataBuffer()
+		db.append("Uint8", CommandCode.MANUAL_COMMAND)
+			.append("Uint8", Math.round(Math.random()*8))
+		this._history.pushInHistory(true, db)
+	}
 
 	// Callbacks on sockets
 	onSocketOpen() {}
@@ -90,6 +123,9 @@ export class RobotController {
 	}
 
 	get url() {	return this._url || "..."	}
+  get history() {
+		return this._history
+	}
 
 	/**
 	* Call it after you have set all the handlers and the proper url, it will

@@ -1,0 +1,95 @@
+.arrow-pad {
+ position: static;
+ width: 120px;
+ height: 50px;
+ background: #AAD;
+ border-radius: 5px;
+ margin: 40px 0px;
+ text-align: left;
+}
+.arrow-pad:before {
+ content: '';
+ position: absolute;
+ background: #AAC;
+ width: 50px;
+ height: 120px;
+ border-radius: 5px;
+ margin: -35px 0px 0px 35px;
+}
+.arrow-pad > .inner-pad {
+ position: absolute;
+ width: 110px;
+ height: 35px;
+ background: #333333;
+ margin: 5px;
+ border-radius: 3px;
+}
+.arrow-pad > .inner-pad:before {
+ content: '';
+ position: absolute;
+ width: 40px;
+ height: 105px;
+ background: #333333;
+ margin: -35px 0px 0px 35px;
+ border-radius: 3px;
+}
+.arrow-pad > .inner-pad.shadow {
+ background: #1a1a1a;
+ margin-top: 10px;
+}
+.arrow-pad > .inner-pad.shadow:before {
+ background: #1a1a1a;
+}
+.arrow-pad > .inner-pad .arrow {
+ position: absolute;
+ background: #454545;
+ width: 10px;
+ height: 15px;
+}
+.arrow-pad > .inner-pad .arrow:before {
+ content: '';
+ position: absolute;
+ width: 0;
+ height: 0;
+ border-left: 10px solid transparent;
+ /* left arrow slant */
+ border-right: 10px solid transparent;
+ /* right arrow slant */
+ border-bottom: 10px solid #454545;
+ /* bottom, add background color here */
+ font-size: 0;
+ line-height: 0;
+ margin: -6px 0px 0px -5px;
+}
+.arrow-pad > .inner-pad .arrow:after {
+ content: '';
+ position: absolute;
+ width: 40px;
+ height: 34px;
+ background: rgba(0, 0, 0, 0);
+ margin-left: -15px;
+ margin-top: -12px;
+}
+.arrow-pad > .inner-pad .arrow:active:after,  .arrow-pad > .inner-pad .arrow.pressed:after {
+ background: rgba(0, 0, 0, 0.3);
+}
+.arrow-pad > .inner-pad .arrow.arrow-left {
+ transform: rotate(-90deg);
+ margin: 12px 0px 0px 15px;
+}
+.arrow-pad > .inner-pad .arrow.arrow-right {
+ transform: rotate(90deg);
+ margin: 12px 0px 0px 85px;
+}
+.arrow-pad > .inner-pad .arrow.arrow-up {
+ transform: rotate(0deg);
+ margin: -20px 0px 0px 50px;
+}
+.arrow-pad > .inner-pad .arrow.arrow-down {
+ transform: rotate(180deg);
+ margin: 45px 0px 0px 50px;
+}
+.instructions {
+ margin: 40px auto;
+ width: 400px;
+}

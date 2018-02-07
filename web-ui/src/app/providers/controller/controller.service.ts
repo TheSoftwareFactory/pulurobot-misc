@@ -36,6 +36,9 @@ export class ControllerService {
 
   get url() : string    {   return this.controller.url }
   set url(url: string)  {   this.controller.url = url   }
+  get history() {
+    return this.controller.history
+  }
 
   // Commands
 

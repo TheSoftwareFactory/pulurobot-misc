@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
-import { RobotController } from "../../models/controller";
+import { RobotController, CommandCode, ReceptionCode, Modes } from "../../models/controller";
 import { RobotRoute, Lidar, Robot } from "../../models/robotmap";
 import { Vector2 } from "../../models/util";
+
+export { RobotController, CommandCode, ReceptionCode, Modes } from "../../models/controller";
 
 @Injectable()
 export class ControllerService {

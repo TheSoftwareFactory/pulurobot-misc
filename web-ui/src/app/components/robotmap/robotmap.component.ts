@@ -54,6 +54,8 @@ export class RobotmapComponent implements OnInit, AfterViewInit {
 
   @Input()
   robot: Robot            = new Robot()
+  get angle() : number {  return Angle.radToDeg(this.robot.angle) }
+
 
   activeRoute: RobotRoute = new RobotRoute();
 
@@ -112,7 +114,6 @@ export class RobotmapComponent implements OnInit, AfterViewInit {
   }
 
   scaleText: string   = "500mm";
-
   updateScale() {
     if(!this.options.zoom)  return
     let val = this.mm_per_pixel * 50

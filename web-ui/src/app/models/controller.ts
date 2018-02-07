@@ -5,7 +5,7 @@ import { RobotRoute, Lidar, Robot }		from "./robotmap";
 // You won't see this oftenly as it's a js trick no real used
 // These names aren't used anywhere, it's just like a recap' of what can be
 // found in other methods, they do not match the TCP cheat tho
-export enum COMMANDS_CODE {
+export enum CommandCode {
 	UPDATE_VIEW = 1,
 	ROUTE = 2,
 	CHARGER = 3,
@@ -16,7 +16,7 @@ export enum COMMANDS_CODE {
 	DEL_MAPS = 8
 }
 
-export enum RECEPTION_CODE {
+export enum ReceptionCode {
 	CURRENT_POSITION = 130,
 	LIDAR = 131,
 	CHARGING_STATE = 134,
@@ -24,27 +24,22 @@ export enum RECEPTION_CODE {
 	MAP_UPDATE = 200
 }
 
-export const MODES = Object.freeze({
-	USER_CONTROL: 0,
-	USER_CONTROL_MAPPING: 1,
-	AUTOMAP_COMPSKIP: 2,
-	AUTOMAP_COMPSTART: 3,
-	DAIJU: 4,
-	DISABLE_MOTOR_MAPPING: 5,
-	DISABLE_MOTORS_NO_MAPPING: 6,
-	SET_CHARGER: 7
-})
+export enum Modes {
+	USER_CONTROL = 0,
+	USER_CONTROL_MAPPING = 1,
+	AUTOMAP_COMPSKIP = 2,
+	AUTOMAP_COMPSTART = 3,
+	DAIJU = 4,
+	DISABLE_MOTOR_MAPPING = 5,
+	DISABLE_MOTORS_NO_MAPPING = 6,
+	SET_CHARGER = 7
+}
 
 export const MANUAL_COMMANDS = Object.freeze({
 	FORWARD: 10,
 	BACKWARD: 11,
 	TURN_LEFT: 12,
 	TURN_RIGHT: 13
-})
-
-export const CHARGE_FLAGS = Object.freeze({
-	CHARGING: 1,
-	FULL: 2
 })
 
 export class ControllerHistoryLine {
@@ -166,7 +161,7 @@ export class RobotController {
   updateView(start, end, callback = null) {
     let db = new DataBuffer()
 
-    db.append("Uint8", COMMANDS_CODE.UPDATE_VIEW)
+    db.append("Uint8", CommandCode.UPDATE_VIEW)
       .append("Int32", start.x)
       .append("Int32", start.y)
       .append("Int32", end.x)
@@ -183,7 +178,7 @@ export class RobotController {
   doRoute(target: Vector2, callback = null) {
     let db = new DataBuffer()
 
-    db.append("Uint8", COMMANDS_CODE.ROUTE)
+    db.append("Uint8", CommandCode.ROUTE)
       .append("Int32", target.x)
       .append("Int32", target.y)
       .append("Uint8", 0)
@@ -203,7 +198,7 @@ export class RobotController {
   doDest(target, command, callback = null) {
     let db = new DataBuffer()
 
-    db.append("Uint8", COMMANDS_CODE.DEST)
+    db.append("Uint8", CommandCode.DEST)
       .append("Int32", target.x)
       .append("Int32", target.y)
       .append("Uint8", command)
@@ -219,7 +214,7 @@ export class RobotController {
   softwareMessages(type, callback = null) {
     let db = new DataBuffer()
 
-  	db.append("Uint8", COMMANDS_CODE.RESTART)
+  	db.append("Uint8", CommandCode.RESTART)
   		.append("Uint8", type)
 
     this._send(db)
@@ -233,7 +228,7 @@ export class RobotController {
   changeMode(mode, callback = null) {
     let db = new DataBuffer()
 
-    db.append("Uint8", COMMANDS_CODE.MODE_CHANGE)
+    db.append("Uint8", CommandCode.MODE_CHANGE)
       .append("Uint8", mode);
 
     this._send(db)
@@ -247,7 +242,7 @@ export class RobotController {
   manualCommand(command, callback = null) {
     let db = new DataBuffer()
 
-    db.append("Uint8", COMMANDS_CODE.MANUAL_COMMAND)
+    db.append("Uint8", CommandCode.MANUAL_COMMAND)
       .append("Uint8", command)
 
     this._send(db)
@@ -260,7 +255,7 @@ export class RobotController {
   charger(callback = null) {
     let db = new DataBuffer()
 
-    db.append("Uint8", COMMANDS_CODE.CHARGER)
+    db.append("Uint8", CommandCode.CHARGER)
 
     this._send(db)
     if(callback)  callback()
@@ -272,7 +267,7 @@ export class RobotController {
   deleteMaps(callback = null) {
     let db = new DataBuffer()
 
-    db.append("Uint8", COMMANDS_CODE.DEL_MAPS)
+    db.append("Uint8", CommandCode.DEL_MAPS)
 
     this._send(db)
     if(callback)  callback()
@@ -293,19 +288,19 @@ export class RobotController {
         let payload = arrayBuffer.slice(3)
 
         switch(code) {
-          case RECEPTION_CODE.MAP_UPDATE:
+          case ReceptionCode.MAP_UPDATE:
             this._retrieveWorld(msg, arrayBuffer)
             break;
-          case RECEPTION_CODE.CURRENT_POSITION:
+          case ReceptionCode.CURRENT_POSITION:
             this._retrievePosition(payload)
             break;
-          case RECEPTION_CODE.CHARGING_STATE:
+          case ReceptionCode.CHARGING_STATE:
             this._retrieveChargingState(payload)
             break;
-          case RECEPTION_CODE.ROUTE:
+          case ReceptionCode.ROUTE:
             this._retrieveRoute(payload)
             break;
-          case RECEPTION_CODE.LIDAR:
+          case ReceptionCode.LIDAR:
             this._retrieveLastLidar(payload)
             break;
           default:
@@ -400,6 +395,13 @@ export class RobotController {
     let volt  = new DataView(payload).getUint16(1, false)
     let percentage = new DataView(payload).getUint8(3)
     let volt_in = new DataView(payload).getUint16(4, false)
+
+		if(this.robot) {
+			this.robot.batteryState 	= flags
+			this.robot.batteryPercent = percentage
+			this.robot.voltIn					= volt_in
+			this.robot.volt						= volt
+		}
 
     this.onChargingStateRetrieve(
       flags,

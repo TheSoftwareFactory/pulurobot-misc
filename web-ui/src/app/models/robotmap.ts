@@ -36,6 +36,13 @@ export class Lidar {
 	}
 }
 
+
+export enum BatteryState {
+	UNKNOWN = -1,
+	CHARGING = 1,
+	FULL = 2
+}
+
 //  The shape of the robot, I'd like this to change promptly tho
 //
 //    0-------------------1
@@ -55,6 +62,11 @@ export class Robot {
 	lastLidar: Lidar			= new Lidar()
 
 	target: Vector2
+
+	batteryState: BatteryState	= BatteryState.UNKNOWN
+	batteryPercent: number			= -1
+	voltIn: number				= -1
+	volt: number 					= -1
 
 	constructor() {
 

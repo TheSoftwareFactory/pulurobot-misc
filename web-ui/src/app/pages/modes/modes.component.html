@@ -9,25 +9,25 @@
       </div>
       <div class="row mt-4">
          <div class="col-sm-6 col-md-6">
-            <button class="btn btn-info btn-block"  id=mode1>
+            <button class="btn btn-info btn-block"  (click)="changeMode(Modes.USER_CONTROL_MAPPING)">
               User control, with localization/mapping
             </button>
             <p>Normal operation mode. Stops autonomous decisions.</p>
          </div>
          <div class="col-sm-6 col-md-6">
-            <button class="btn btn-info btn-block"  id=mode2>
+            <button class="btn btn-info btn-block"  (click)="changeMode(Modes.AUTOMAP_COMPSKIP)">
               Autonomous mapping, skip compass
             </button>
             <p>Make the robot decide where to go.</p>
          </div>
          <div class="col-sm-6 col-md-6">
-            <button class="btn btn-info btn-block"  id=mode5>
+            <button class="btn btn-info btn-block"  (click)="changeMode(Modes.DISABLE_MOTOR_MAPPING)">
               Motors disabled, with localization/mapping
             </button>
             <p>Lets you move the robot freely.</p>
          </div>
          <div class="col-sm-6 col-md-6">
-            <button class="btn btn-info btn-block"  id=mode6>
+            <button class="btn btn-info btn-block"  (click)="changeMode(Modes.DISABLE_MOTORS_NO_MAPPING)">
               Motors disabled, NO localization/mapping
             </button>
             <p>Does not mess up the map if the robot is wrongly localized.</p>
@@ -37,19 +37,19 @@
       <h6>Secondary modes</h6>
       <div class="row mt-4">
          <div class="col-sm-6 col-md-4">
-            <button class="btn btn-info btn-sm btn-block"  id=mode0>
+            <button class="btn btn-info btn-sm btn-block"  (click)="changeMode(Modes.USER_CONTROL)">
               User control, NO localization/mapping
             </button>
             <p>Take the total control of what happens.</p>
          </div>
          <div class="col-sm-6 col-md-4">
-            <button class="btn btn-info btn-sm btn-block"  id=mode3>
+            <button class="btn btn-info btn-sm btn-block"  (click)="changeMode(Modes.AUTOMAP_COMPSTART)">
               Autonom. mapping, start from compass
             </button>
             <p> Use this to localize the robot on the map. Let it run for a while, until localized..</p>
          </div>
          <div class="col-sm-6 col-md-4">
-            <button class="btn btn-info btn-sm btn-block"  id=mode4>
+            <button class="btn btn-info btn-sm btn-block"  (click)="changeMode(Modes.DAIJU)">
               DaijuMode
             </button>
             <p>Daiju</p>
@@ -59,7 +59,7 @@
       <h6>Charger</h6>
       <div class="row mt-4">
          <div class="col-sm-6">
-            <button class="btn btn-outline-secondary btn-block btn-lg"  id=mode7>
+            <button class="btn btn-outline-secondary btn-block btn-lg"  (click)="changeMode(Modes.CHARGER)">
               Program charger location
             </button>
          </div>

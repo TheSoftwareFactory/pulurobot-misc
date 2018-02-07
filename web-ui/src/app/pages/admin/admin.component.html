@@ -1,7 +1,19 @@
 <!--  ROBOT SOFTWARE MANIPULATION -->
 <div class="card row" id="soft-section">
    <div class="card-body">
-      <div class="row">
+     <div class="row" *ngIf="!loggedAsAdmin()">
+       <div class="col-xs-12 p-5">
+         <p>
+           Please log in with an admin account
+         </p>
+         <label>Username</label>
+         <input class="" [(ngModel)]="name" type="string"/><br/>
+         <label>Password</label>
+         <input class="" [(ngModel)]="pass" type="password"/><br/>
+         <button (click)="login()">Log in</button>
+       </div>
+     </div>
+      <div class="row" *ngIf="loggedAsAdmin()">
          <div class="col-lg-4">
             <h4 class="mb-3">Software manipulations</h4>
             <button
@@ -45,7 +57,7 @@
             <p>Runs <i>shutdown -r now</i> on the robot Raspi</p>
             <button
               class="btn btn-danger btn-sm btn-block"
-              (click)="rn1rn1hostShutdownRaspi()">
+              (click)="rn1hostShutdownRaspi()">
               Shutdown the robot computer
             </button>
             <p>Runs <i>shutdown -h now</i> on the robot Raspi - do this before switching off the power to avoid filesystem corruption.</p>

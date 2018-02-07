@@ -1,28 +1,28 @@
 import { Util, Angle, Vector2, DataBuffer } from "./util";
-import { RobotRoute, Lidar }		from "./robotmap";
+import { RobotRoute, Lidar, Robot }		from "./robotmap";
 
 // ======================================================= Constants definitions
 // You won't see this oftenly as it's a js trick no real used
 // These names aren't used anywhere, it's just like a recap' of what can be
 // found in other methods, they do not match the TCP cheat tho
-export const COMMANDS_CODE = Object.freeze({
-	UPDATE_VIEW: 1,
-	ROUTE: 2,
-	CHARGER: 3,
-	MODE_CHANGE: 4,
-	MANUAL_COMMAND: 5,
-	RESTART: 6,
-	DEST: 7,
-	DEL_MAPS: 8
-})
+export enum COMMANDS_CODE {
+	UPDATE_VIEW = 1,
+	ROUTE = 2,
+	CHARGER = 3,
+	MODE_CHANGE = 4,
+	MANUAL_COMMAND = 5,
+	RESTART = 6,
+	DEST = 7,
+	DEL_MAPS = 8
+}
 
-export const RECEPTION_CODE = Object.freeze({
-	CURRENT_POSITION: 130,
-	LIDAR: 131,
-	CHARGING_STATE: 134,
-	ROUTE: 135,
-	MAP_UPDATE: 200
-})
+export enum RECEPTION_CODE {
+	CURRENT_POSITION = 130,
+	LIDAR = 131,
+	CHARGING_STATE = 134,
+	ROUTE = 135,
+	MAP_UPDATE = 200
+}
 
 export const MODES = Object.freeze({
 	USER_CONTROL: 0,
@@ -47,6 +47,28 @@ export const CHARGE_FLAGS = Object.freeze({
 	FULL: 2
 })
 
+export class ControllerHistoryLine {
+	date: Date;
+	command: number;
+	payload: DataBuffer;
+	constructor(public sent: boolean, data: DataBuffer) {
+		this.command = data.array[0].value
+		this.date = new Date()
+	}
+}
+export class ControllerHistory {
+	history: Array<ControllerHistoryLine> = [];
+	maxHistory: number = 10000;
+	constructor() {}
+	pushInHistory(sent: boolean, data: DataBuffer) {
+		let line = new ControllerHistoryLine(sent, data)
+		this.history.push(line)
+		if(this.history.length > this.maxHistory)
+			this.history.shift()
+		console.log(this)
+	}
+}
+
 // ==========================================)================= Robot controller
 
 /**
@@ -54,14 +76,17 @@ export const CHARGE_FLAGS = Object.freeze({
 */
 export class RobotController {
 
-	private _socket: WebSocket 	= null;
-	private _url: string					= Util.getAppropriateWsUrl(true) || "";
+	private _history: ControllerHistory =	new ControllerHistory();
+	private _socket: WebSocket 					= null;
+	private _url: string								= Util.getAppropriateWsUrl(true) || "";
+
+	public robot: Robot
 
   constructor() {}
 
 	// Callbacks on sockets
 	onSocketOpen() {}
-	onSocketError(error: Event) {	console.warn("Unable to connect (Error)");	}
+	onSocketError(error: Event) {	}
 	onUrlChange(url: string) {}
 
 	set url(url) {
@@ -76,6 +101,7 @@ export class RobotController {
 	* open the _socket connection
 	*/
   startConnection() {
+		this.endConnection("Restart")
     this._socket = Util.createWebSocket(this._url, "rn1-protocol")
     this._socket.onopen = ()=> {
       this.onSocketOpen()
@@ -95,7 +121,7 @@ export class RobotController {
 	* Close the _socket when you need it
 	*/
   endConnection(msg = "Closed on purpose by the controller") {
-    if(!this._socket)  return
+    if(this.isClosing() || this.isClosed())  return
     this._socket.close(1000, msg)
   }
 
@@ -118,12 +144,15 @@ export class RobotController {
 	}
 
   private _send(databuffer) {
-    if (this._socket.readyState == this._socket.CLOSED) {
-      console.warn("This _socket is CLOSED")
-    } else if (this._socket.readyState == this._socket.CLOSING) {
-      console.warn("This _socket is CLOSING")
-    } else {
+    if (this.isClosed()) {
+      console.warn("This socket is CLOSED")
+    } else if (this.isClosing()) {
+      console.warn("This socket is CLOSING")
+    } else if(this.isConnecting()) {
+			console.warn("Wait a little more")
+		}else {
       this._socket.send(databuffer.toBlob())
+			this._history.pushInHistory(true, databuffer)
     }
   }
 
@@ -344,6 +373,8 @@ export class RobotController {
     image.width = 256;
     image.height = 256;
     world.set([img_x_mm, img_y_mm], image);
+		let db = DataBuffer.parser( arrayBuffer, [{type:"Uint8"},{type:"Int32"},{type:"Int32"},{type:"Uint8"}])
+		this._history.pushInHistory(false, db)
   }
 
   /**

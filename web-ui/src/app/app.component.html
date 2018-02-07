@@ -1,3 +1,4 @@
+<!--  Left panel -->
 <aside id="left-panel" class="left-panel" style="position: static">
   <nav class="navbar navbar-expand-sm navbar-default">
     <div class="navbar-header">
@@ -31,6 +32,8 @@
     <!-- /.navbar-collapse -->
   </nav>
 </aside>
+
+<!--  Right panel -->
 <div id="right-panel" class="right-panel">
   <!-- Header-->
   <header id="header" class="header">
@@ -70,7 +73,7 @@
                 </p>
               </div>
 
-              <div class="card-body  bg-flat-color-5 p-1" *ngIf="isConnecting()" (click)="end()">
+              <div class="card-body  bg-flat-color-5 p-1" *ngIf="isOpen()" (click)="end()">
                 <p class="text-light text-center mb-0">
                   Connected<br/>
                   <i class="fa fa-plug" aria-hidden="true"></i>
@@ -94,27 +97,6 @@
           </div>
         </div>
       </div>
-      <!-- <div class="col-sm-1">
-        <div class="language-select dropdown" id="language-select">
-           <a class="dropdown-toggle" href="#" data-toggle="dropdown"  id="language" aria-haspopup="true" aria-expanded="true">
-           <i class="flag-icon flag-icon-us"></i>
-           </a>
-           <div class="dropdown-menu" aria-labelledby="language" >
-              <div class="dropdown-item">
-                 <span class="flag-icon flag-icon-fr"></span>
-                 </div>
-              <div class="dropdown-item">
-                 <i class="flag-icon flag-icon-es"></i>
-                 </div>
-              <div class="dropdown-item">
-                 <i class="flag-icon flag-icon-us"></i>
-              </div>
-              <div class="dropdown-item">
-                 <i class="flag-icon flag-icon-it"></i>
-                 </div>
-           </div>
-        </div>
-        </div> -->
     </div>
   </header>
   <!--  Pages -->

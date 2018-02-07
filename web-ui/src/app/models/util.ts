@@ -8,10 +8,17 @@ export class Vector2 {
   public x: number;
   public y: number;
 
-  constructor(x: number = 0, y: number = x) {
-    this.x = x || 0
-    if(isNaN(y))  this.y = x || 0
-    else this.y = y || 0
+  constructor(v: Vector2);
+  constructor(x?: number, y?: number);
+  constructor(vx: any = 0, y: number = vx) {
+    if(vx instanceof Vector2) {
+      this.x = vx.x
+      this.y = vx.y
+    } else {
+      this.x = vx || 0
+      if(isNaN(y))  this.y = vx || 0
+      else this.y = y || 0
+    }
   }
 
   addScalar(m) {
@@ -113,7 +120,7 @@ export class Vector2 {
 * way to create an ArrayBuffer
 */
 export class DataBuffer {
-  array: Array<any>   = [];
+  array: Array<{size:number, type: string, value: number, LittleEndian:boolean}>   = [];
   length: number      = 0;
   MIMEtype: string    = "application/octet-stream";
 
@@ -121,12 +128,28 @@ export class DataBuffer {
 
   // This is tricky, it assumes that in the name of the type, you have the
   // number of bits and multiple of 8 (which is true according to the doc)
-  static sizeOf(type) {
+  static sizeOf(type: string) {
     return (+(type.replace(/\D/g,'')) / 8)
   }
 
+  static formatType(type: string) {
+    return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase()
+  }
+
+  static parser(arrayBuffer: ArrayBuffer, parsing: Array<{type:string, LittleEndian?: boolean}>) {
+    let db = new DataBuffer()
+    let s = 0
+    for(let p of parsing) {
+      p.type = DataBuffer.formatType(p.type)
+      let le = p.LittleEndian || false
+      db.append(p.type, new DataView(arrayBuffer)["get"+p.type](s, le), le)
+      s+=DataBuffer.sizeOf(p.type)
+    }
+    return db
+  }
+
   append(type, value, LittleEndian = false) {
-    type = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase()
+    type = DataBuffer.formatType(type)
     let s = DataBuffer.sizeOf(type)
     this.array.push({size:s,type:type, value:value, LittleEndian:LittleEndian})
     this.length += s

@@ -1,17 +1,19 @@
 <div class="row" id="map-section">
    <div class="col-sm-12 col-md-10 pr-0">
-     <robotmap [options]="{zoom:true, details:true}"></robotmap>
+     <robotmap [options]="{zoom:true, details:true}" [robot]="robot"></robotmap>
    </div>
    <div class="col-sm-12 col-md-2">
       <!--  GOTTA REMOVE THIS FROM THERE -->
-      <input class="btn btn-info btn-block btn-sm" type=button id=route value="Route there" style="display:none">
-      <input class="btn btn-info btn-block btn-sm" type=button id=direct_fwd value="Direct forward" style="display:none">
-      <input class="btn btn-info btn-block btn-sm" type=button id=direct_back value="Direct reverse" style="display:none">
-      <input class="btn btn-info btn-block btn-sm" type=button id=rotate value="Rotate towards" style="display:none">
+      <div *ngIf="robot.target">
+        <button class="btn btn-info btn-block btn-sm" (click)="routeToTarget()">Route there</button>
+        <button class="btn btn-info btn-block btn-sm" (click)="goForwardToTarget()">Direct forward</button>
+        <button class="btn btn-info btn-block btn-sm" (click)="goBackwardToTarget()">Direct reverse</button>
+        <button class="btn btn-info btn-block btn-sm" (click)="rotateTowardTarget()">Rotate towards</button>
+      </div>
       <hr/>
-      <input class="btn btn-info btn-block btn-sm" type=button id=charger value="Go to charger">
-      <input class="btn btn-info btn-block btn-sm" type=button id=update_view value="Update view">
-      <button class="btn btn-danger btn-block btn-sm" id=estop>
+      <button class="btn btn-info btn-block btn-sm" (click)="goToCharger()">Go to charger</button>
+      <button class="btn btn-info btn-block btn-sm" (click)="updateView()">Update view</button>
+      <button class="btn btn-danger btn-block btn-sm" (click)="stop()">
         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
         STOP
         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>

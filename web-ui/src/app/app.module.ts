@@ -1,5 +1,6 @@
 import { BrowserModule } 		from "@angular/platform-browser";
 import { NgModule } 				from "@angular/core";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { RouterModule, Routes, Router, NavigationEnd } 		from "@angular/router";
 import {enableProdMode} from '@angular/core';
 
@@ -14,6 +15,7 @@ import { MapComponent } from './pages/map/map.component';
 import { ModesComponent } from './pages/modes/modes.component';
 
 import { ControllerService }	from "./providers/controller/controller.service";
+import { AuthService }					from "./providers/auth.service"
 
 
 export const routes: Routes = [
@@ -44,10 +46,12 @@ export const routes: Routes = [
   ],
   imports: [
     BrowserModule,
-		RouterModule.forRoot(routes)
+		RouterModule.forRoot(routes),
+		FormsModule
   ],
   providers: [
-		ControllerService
+		ControllerService,
+		AuthService
 	],
   bootstrap: [AppComponent]
 })

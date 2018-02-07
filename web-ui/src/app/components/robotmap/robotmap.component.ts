@@ -1,15 +1,32 @@
-import { Component, Input, ViewChild, ElementRef, HostBinding, OnInit, OnDestroy } from '@angular/core';
+import { Component,
+  Input,
+  ViewChild,
+  ElementRef,
+  HostBinding,
+  OnInit,
+  AfterViewInit,
+  OnDestroy,
+  NgZone } from '@angular/core';
 
 import { Vector2, Angle } from "../../models/util";
-import { RobotRoute, Lidar, ROBOT_SHAPE } from "../../models/robotmap";
+import { RobotRoute, Lidar, Robot, ROBOT_SHAPE } from "../../models/robotmap";
 
 @Component({
   selector: 'robotmap',
   templateUrl: './robotmap.component.html',
   styleUrls: ['./robotmap.component.css']
 })
-export class RobotmapComponent implements OnInit {
+export class RobotmapComponent implements OnInit, AfterViewInit {
 
+  // ======================================================================= Map
+  // Possible options :
+  //    zoom = true | false
+  //    zoommin = number (in mm per pixel)
+  //    zoommax = number (in mm per pixel)
+  //    redraw = true | false
+  //    details = true | false
+  //		ratio = number
+  // 		width = number (in px)
   static default_options: any = { zoom: true, zoommin: 1, zoommax: 25, details: true, redraw: false, ratio: 4/3, width: 1000 };
 
   @Input()
@@ -23,30 +40,33 @@ export class RobotmapComponent implements OnInit {
     return this._options;
   }
 
-  _options: any = RobotmapComponent.default_options;
-
   @ViewChild("canvas") canvasRef: ElementRef;
 
   dimension: Vector2      = new Vector2();
+  viewStart: Vector2     = new Vector2(-3000);
+  private mm_per_pixel: number    = 10.0;
 
-  view_start: Vector2     = new Vector2(-3000);
-  mm_per_pixel: number    = 10.0;
-
-  clicked: boolean        = false;
-  click_pos_mm: Vector2   = new Vector2();
+  get clicked() : boolean {
+    return this.robot.target != null
+  }
   dragging: boolean       = false;
   drag_pos: Vector2        = new Vector2();
 
-  angle: number           = 0;
-  pos: Vector2            = new Vector2();
+  @Input()
+  robot: Robot            = new Robot()
 
-  lastLidar: Lidar        = new Lidar();
   activeRoute: RobotRoute = new RobotRoute();
 
-  _world: Map<any, any>    = new Map();
-  _rendering: boolean     = false;
+  private _world: Map<any, any>    = new Map();
+  private _rendering: boolean     = false;
 
-  constructor() { }
+  private _robotImg: any
+  private _options: any = RobotmapComponent.default_options;
+
+  constructor(private ngZone: NgZone) {
+    this._robotImg = new Image(this.robot.dimensions.x, this.robot.dimensions.y)
+    this._robotImg.src = "/assets/images/robot.png"
+  }
 
   ngOnInit() {
 
@@ -55,10 +75,13 @@ export class RobotmapComponent implements OnInit {
     this._zoommax = this.options.zoommax
     this._zoommin = this.options.zoommin
 
-    this.setRobotPosition(0,0,0)
     this.updateScale()
 
     this.startRender()
+  }
+
+  ngAfterViewInit() {
+    this.onResize()
   }
 
   ngOnDestroy() {
@@ -67,27 +90,25 @@ export class RobotmapComponent implements OnInit {
 
   @HostBinding('style.height.px') canvasDim: any;
 
-  onResize(el: HTMLElement) {
+  onResize(el?) {
     let rect = this.canvasRef.nativeElement.getBoundingClientRect()
     this.dimension = new Vector2(rect.width, rect.height);
+    console.log(this.dimension)
   }
 
-  setRobotPosition(angle, x, y) {
-    this.pos.x = x
-    this.pos.y = y
-    this.angle = angle
+  realToPixel(v: Vector2) { return Vector2.divideScalar(v, this.mm_per_pixel) }
+  pixelToReal(v: Vector2) { return Vector2.multiplyScalar(v, this.mm_per_pixel)}
+
+  get realStart() {
+    return this.viewStart.copy()
   }
 
-  get mm_start() {
-    return this.view_start.copy()
+  get realDim() {
+    return this.pixelToReal(this.dimension)
   }
 
-  get mm_dim() {
-    return Vector2.multiplyScalar(this.dimension, this.mm_per_pixel)
-  }
-
-  get mm_end() {
-    return this.mm_dim.add(this.view_start)
+  get realEnd() {
+    return this.realDim.add(this.realStart)
   }
 
   scaleText: string   = "500mm";
@@ -103,35 +124,10 @@ export class RobotmapComponent implements OnInit {
     this.scaleText = s
   }
 
-  // Modify this to grant the possibility to have two maps on the same page
-  activate_click() {
-    this.clicked = true
-    document.getElementById("route").style.display = "block";
-    document.getElementById("direct_fwd").style.display = "block";
-    document.getElementById("direct_back").style.display = "block";
-    document.getElementById("rotate").style.display = "block";
-  }
-
-  deactivate_click() {
-    this.clicked = false
-    document.getElementById("route").style.display = "none";
-    document.getElementById("direct_fwd").style.display = "none";
-    document.getElementById("direct_back").style.display = "none";
-    document.getElementById("rotate").style.display = "none";
-  }
-
-  handle_click(x, y) {
-    this.click_pos_mm = new Vector2(x,y)
-      .multiplyScalar(this.mm_per_pixel)
-      .add(this.view_start);
-    this.activate_click();
-  }
-
-
-  _zoommax: number     = RobotmapComponent.default_options.zoommax;
-  _zoommin: number     = RobotmapComponent.default_options.zoommin;
-  _zoomFactorIn: number     = 0;
-  _zoomFactorOut: number    = 0;
+  private _zoommax: number     = RobotmapComponent.default_options.zoommax;
+  private _zoommin: number     = RobotmapComponent.default_options.zoommin;
+  private _zoomFactorIn: number     = 0;
+  private _zoomFactorOut: number    = 0;
 
   set zoomFactor(factor) {
     if(factor <= 0) {
@@ -193,7 +189,7 @@ export class RobotmapComponent implements OnInit {
       this._draw()
       requestAnimationFrame(() => { render() })
     }
-    render()
+    this.ngZone.runOutsideAngular(render)
   }
 
   /**
@@ -214,7 +210,7 @@ export class RobotmapComponent implements OnInit {
 
     for(let [key, img] of this._world as any) {
       let pos = new Vector2(key[0], key[1])
-        .sub(this.view_start)
+        .sub(this.viewStart)
         .divideScalar(this.mm_per_pixel)
 
         // let drawImage handle out-of-bounds coordinates, just try to draw everything
@@ -223,85 +219,86 @@ export class RobotmapComponent implements OnInit {
           (256 * 40) / this.mm_per_pixel);
     }
 
-    // Draw the robot (ugly design tho, this should propably replaced by an more appealing image)
+    // Draw the robot
 
-    let pos_robot_pix = Vector2.sub(this.pos,this.view_start)
-      .divideScalar(this.mm_per_pixel);
+    let posRobotPx = this.realToPixel(Vector2.sub(this.robot.pos,this.viewStart))
+    let imageOffset = this.realToPixel(this.robot.center.copy().negate())
+    let robotDim = this.realToPixel(this.robot.dimensions)
 
     ctx.save()
-    ctx.translate(pos_robot_pix.x, pos_robot_pix.y)
-    ctx.rotate(this.angle)
+    ctx.translate(posRobotPx.x, posRobotPx.y)
+    ctx.rotate(this.robot.angle)
+    ctx.drawImage(this._robotImg,imageOffset.x,imageOffset.y, robotDim.x, robotDim.y)
+    ctx.restore()
 
-    ctx.beginPath()
-    ctx.moveTo(ROBOT_SHAPE[0][0] / this.mm_per_pixel, ROBOT_SHAPE[0][1] / this.mm_per_pixel);
-    for (let i = 0; i < 7; i++) {
-        ctx.lineTo(ROBOT_SHAPE[i][0] / this.mm_per_pixel, ROBOT_SHAPE[i][1] / this.mm_per_pixel);
-    }
-    ctx.closePath();
-
-    ctx.fillStyle = "#C07040A0";
-    ctx.fill();
-    ctx.restore();
+    // ctx.save()
+    // ctx.translate(posRobotPx.x, posRobotPx.y)
+    // ctx.rotate(this.robot.angle)
+    // ctx.beginPath()
+    // ctx.moveTo(ROBOT_SHAPE[0][0] / this.mm_per_pixel, ROBOT_SHAPE[0][1] / this.mm_per_pixel);
+    // for (let i = 0; i < 7; i++) {
+    //     ctx.lineTo(ROBOT_SHAPE[i][0] / this.mm_per_pixel, ROBOT_SHAPE[i][1] / this.mm_per_pixel);
+    // }
+    // ctx.closePath();
+    //
+    // ctx.fillStyle = "#C07040A0";
+    // ctx.fill();
+    // ctx.restore();
 
     // Draw the route
     let len = this.activeRoute.length
     if (len > 0) {
 
-        ctx.beginPath();
-        ctx.lineJoin = "round"
-        ctx.lineCap = "round"
-        ctx.moveTo(
-          (this.activeRoute.start.x - this.view_start.x) / this.mm_per_pixel,
-          (this.activeRoute.start.y - this.view_start.y) / this.mm_per_pixel);
-        for (let i = 0; i < len; i++) {
-            let point = this.activeRoute.route[i]
-            ctx.lineWidth = 3;
-            if (point.smthg > 0)
-                ctx.strokeStyle = "#C00000B0"; //transparent red
-            else
-                ctx.strokeStyle = "#00C030B0"; // transparent green
+      let startPx = this.realToPixel(Vector2.sub(this.activeRoute.start, this.viewStart))
 
-            ctx.lineTo(
-              (point.coord.x - this.view_start.x) / this.mm_per_pixel,
-              (point.coord.y - this.view_start.y) / this.mm_per_pixel);
-            ctx.stroke();
-            // This is questionnable tho
-            if (i != len - 1) {
-                ctx.beginPath();
-                ctx.moveTo(
-                  (point.coord.x - this.view_start.x) / this.mm_per_pixel,
-                  (point.coord.y - this.view_start.y) / this.mm_per_pixel);
-            }
-        }
+      ctx.beginPath();
+      ctx.lineJoin = "round"
+      ctx.lineCap = "round"
+      ctx.moveTo(startPx.x, startPx.y);
+
+      for (let point of this.activeRoute.route) {
+        let pointPx = this.realToPixel(Vector2.sub(point.coord, this.viewStart))
+        ctx.lineWidth = 3;
+        if (point.smthg > 0)
+            ctx.strokeStyle = "#C00000B0"; //transparent red
+        else
+            ctx.strokeStyle = "#00C030B0"; // transparent green
+
+        ctx.lineTo(pointPx.x, pointPx.y);
+        ctx.stroke();
+        // // This is questionnable tho
+        // if (i != len - 1) {
+        //     ctx.beginPath();
+        //     ctx.moveTo(pointPx.x, pointPx.y);
+        // }
+      }
     }
 
     // Draws the last obstacles detected
 
-    if(this.lastLidar) {
-      for (let i = 0; i < this.lastLidar.length; i++) {
-          ctx.fillStyle = "red";
-          ctx.fillRect(
-            (this.lastLidar.points[i].x - this.view_start.x) / this.mm_per_pixel - 1,
-            (this.lastLidar.points[i].y - this.view_start.y) / this.mm_per_pixel - 1,
-            2, 2);
+    if(this.robot.lastLidar) {
+      for (let point of this.robot.lastLidar.points) {
+        let pointPx = this.realToPixel(Vector2.sub(point, this.viewStart))
+        ctx.fillStyle = "red";
+        ctx.fillRect(pointPx.x - 1, pointPx.y - 1, 2, 2);
       }
     }
 
-    if (this.clicked) {
-      ctx.lineJoin = "round"
-      ctx.lineCap = "round"
+    // If clicked draw the line to the click
+    if (this.robot.target) {
+      let posPx     = this.realToPixel(Vector2.sub(this.robot.pos, this.viewStart))
+      let targetPx  = this.realToPixel(Vector2.sub(this.robot.target, this.viewStart))
+
+      ctx.lineJoin  = "round"
+      ctx.lineCap   = "round"
       ctx.fillStyle = "#FF7090C0";
-      ctx.fillRect(
-        (this.click_pos_mm.x - this.view_start.x) / this.mm_per_pixel - 5,
-        (this.click_pos_mm.y - this.view_start.y) / this.mm_per_pixel - 5, 10, 10);
+      ctx.fillRect(targetPx.x - 5, targetPx.y - 5, 10, 10);
 
       ctx.beginPath();
-      ctx.moveTo((this.pos.x - this.view_start.x) / this.mm_per_pixel,
-        (this.pos.y - this.view_start.y) / this.mm_per_pixel);
+      ctx.moveTo(posPx.x, posPx.y);
       ctx.lineWidth = 6;
       ctx.strokeStyle = "#FF709090";
-      ctx.lineTo((this.click_pos_mm.x - this.view_start.x) / this.mm_per_pixel,
-        (this.click_pos_mm.y - this.view_start.y) / this.mm_per_pixel);
+      ctx.lineTo(targetPx.x, targetPx.y);
       ctx.stroke();
     }
   }
@@ -320,14 +317,13 @@ export class RobotmapComponent implements OnInit {
 
     this.dragging = false
     let rect = this.canvasRef.nativeElement.getBoundingClientRect()
-    let drag_end = new Vector2(+(e.clientX - rect.left),+(e.clientY - rect.top))
+    let drag_end = new Vector2(e.offsetX,e.offsetY)
     let drag = Vector2.sub(drag_end, this.drag_pos)
 
     // Below 5 pixels move, consider it as click
-    if(drag.norm() < 5)
-      this.handle_click(drag_end.x, drag_end.y)
-    // else
-    //   this.draw()
+    if(drag.norm() < 5) {
+      this.robot.target = this.pixelToReal(new Vector2(drag_end)).add(this.viewStart)
+    }
   }
 
   onMouseOut(e) {
@@ -340,7 +336,7 @@ export class RobotmapComponent implements OnInit {
     let rect = this.canvasRef.nativeElement.getBoundingClientRect()
     let drag = new Vector2(e.movementX, e.movementY)
 
-    this.view_start.sub(drag.multiplyScalar(this.mm_per_pixel))
+    this.viewStart.sub(drag.multiplyScalar(this.mm_per_pixel))
   }
 
 }

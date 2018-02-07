@@ -36,27 +36,31 @@ export class Lidar {
 	}
 }
 
-// ========================================================================= Map
-// Possible options :
-//    zoom = true | false
-//    zoommin = number (in mm per pixel)
-//    zoommax = number (in mm per pixel)
-//    redraw = true | false
-//    details = true | false
-//		ratio = number
-// 		width = number (in px)
-
-
 //  The shape of the robot, I'd like this to change promptly tho
 //
-//    0-------------1
-//    |             |
-//    |             2
-//    |      M  O     3
-//    |             4
-//    |             |
-//    6-------------5
+//    0-------------------1
+//    |                   |
+//    |                   2
+//    |            M  O     3
+//    |                   4
+//    |                   |
+//    6-------------------5
 //
+export class Robot {
+	dimensions: Vector2 	= new Vector2(750, 480)
+	center: Vector2 			= new Vector2(500, 240)
+
+	pos: Vector2 					= new Vector2()
+	angle: number					= 0
+	lastLidar: Lidar			= new Lidar()
+
+	target: Vector2
+
+	constructor() {
+
+	}
+}
+
 
 export const ROBOT_SHAPE = [
     [-500, -240],

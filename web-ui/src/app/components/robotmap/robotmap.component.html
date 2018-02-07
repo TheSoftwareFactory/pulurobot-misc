@@ -1,7 +1,7 @@
 <div id="map">
-  <canvas #canvas (window:resize)="onResize()"
-     width="1000"
-     height="800"
+  <canvas #canvas (window:resize)="onResize($event)"
+     width="{{options.width}}"
+     height="{{options.width/options.ratio}}"
      style="width:100%; box-shadow: 0 2px 5px 0px grey inset;"
      (mousedown)="onMouseDown($event)"
      (mouseup)="onMouseUp($event)"
@@ -14,14 +14,14 @@
    </div>
    <!--  Zoom -->
    <div *ngIf="options.zoom" class="overlay-top-right">
-     <i (click)="zoomIn()"   class="fa fa-minus-square clickable zoom-button"></i>
+     <i (click)="zoomIn()"   class="fa fa-plus-square clickable zoom-button"></i>
      <div class="scale">{{scaleText}}</div>
-     <i (click)="zoomOut()"  class="fa fa-plus-square clickable zoom-button"></i>
+     <i (click)="zoomOut()"  class="fa fa-minus-square clickable zoom-button"></i>
    </div>
    <!--  Position details -->
    <div *ngIf="options.details" class="overlay-bottom-right light-overlay">
-       <i>x: {{pos.x}}</i> -
-       <i>y: {{pos.y}}</i> -
+       <i>x: {{robot.pos.x}}</i> -
+       <i>y: {{robot.pos.y}}</i> -
        <i>angle: {{robotAngle}}</i> -
    </div>
 </div>

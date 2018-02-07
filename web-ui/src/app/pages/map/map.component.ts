@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
+import { Vector2 } from "../../models/util"
+import { ControllerService } from "../../providers/controller/controller.service"
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
@@ -7,7 +9,39 @@ import { Component, OnInit } from '@angular/core';
 })
 export class MapComponent implements OnInit {
 
-  constructor() {}
+  constructor(private ctrlServ: ControllerService) {}
 
+  get robot() {
+    return this.ctrlServ.robot
+  }
   ngOnInit() {}
+
+  routeToTarget() {
+    this.ctrlServ.doRoute(this.ctrlServ.robot.target)
+  }
+
+  goForwardToTarget() {
+    this.ctrlServ.doDest(this.ctrlServ.robot.target, 0)
+  }
+
+  goBackwardToTarget() {
+    this.ctrlServ.doDest(this.ctrlServ.robot.target, 1)
+  }
+
+  rotateTowardTarget() {
+    this.ctrlServ.doDest(this.ctrlServ.robot.target, 8)
+  }
+
+  goToCharger() {
+    this.ctrlServ.charger()
+  }
+
+  updateView() {
+    // Needs a binding with the map
+    this.ctrlServ.updateView(new Vector2(-3000), new Vector2(3000))
+  }
+
+  stop() {
+    this.ctrlServ.changeMode(5)
+  }
 }

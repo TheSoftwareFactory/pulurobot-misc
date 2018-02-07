@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { RobotController } from "../../models/controller";
-import { RobotRoute, Lidar } from "../../models/robotmap";
+import { RobotRoute, Lidar, Robot } from "../../models/robotmap";
 import { Vector2 } from "../../models/util";
 
 @Injectable()
@@ -8,8 +8,11 @@ export class ControllerService {
 
   private controller: RobotController;
 
+  public robot: Robot = new Robot();
+
   constructor() {
     this.controller = new RobotController()
+    this.controller.robot = this.robot
   }
 
   startConnection() {

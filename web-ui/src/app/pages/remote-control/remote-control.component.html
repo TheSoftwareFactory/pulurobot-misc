@@ -11,7 +11,7 @@
           <strong>Left/Right</strong><br/>
            10° per click
        </p>
-       <arrow-pad></arrow-pad>
+       <arrow-pad (left)="left()" (right)="right()" (down)="down()" (up)="up()"></arrow-pad>
       <button class="btn btn-danger btn-block btn-sm" (click)="stop()">
         <i class="fa fa-hand-paper-o" aria-hidden="true"></i>
         STOP

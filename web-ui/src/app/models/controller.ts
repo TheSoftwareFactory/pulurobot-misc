@@ -35,12 +35,12 @@ export enum Modes {
 	SET_CHARGER = 7
 }
 
-export const MANUAL_COMMANDS = Object.freeze({
-	FORWARD: 10,
-	BACKWARD: 11,
-	TURN_LEFT: 12,
-	TURN_RIGHT: 13
-})
+export enum ManualCommands {
+	FORWARD = 10,
+	BACKWARD = 11,
+	TURN_LEFT = 12,
+	TURN_RIGHT = 13
+}
 
 export class ControllerHistoryLine {
 	date: Date;
@@ -113,8 +113,8 @@ export class RobotController {
 	}
 
 	// Callbacks on sockets
-	onSocketOpen() {}
-	onSocketError(error: Event) {	}
+	onOpen() {}
+	onError(error: Event) {	}
 	onUrlChange(url: string) {}
 
 	set url(url) {
@@ -135,13 +135,13 @@ export class RobotController {
 		this.endConnection("Restart")
     this._socket = Util.createWebSocket(this._url, "rn1-protocol")
     this._socket.onopen = ()=> {
-      this.onSocketOpen()
+      this.onOpen()
     }
     this._socket.onmessage = (msg) => {
       this._onMessage(msg)
     }
     this._socket.onerror = (error) => {
-      this.onSocketError(error)
+      this.onError(error)
     }
     this._socket.onclose = (event) => {
       this.onSocketClose(event)

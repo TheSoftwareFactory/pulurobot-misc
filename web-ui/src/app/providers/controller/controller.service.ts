@@ -3,7 +3,7 @@ import { RobotController, CommandCode, ReceptionCode, Modes } from "../../models
 import { RobotRoute, Lidar, Robot } from "../../models/robotmap";
 import { Vector2 } from "../../models/util";
 
-export { RobotController, CommandCode, ReceptionCode, Modes } from "../../models/controller";
+export { RobotController, CommandCode, ReceptionCode, Modes, ManualCommands } from "../../models/controller";
 
 @Injectable()
 export class ControllerService {

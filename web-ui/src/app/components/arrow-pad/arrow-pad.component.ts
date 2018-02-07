@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'arrow-pad',
@@ -7,7 +7,21 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ArrowPadComponent implements OnInit {
 
-  constructor() { }
+  @Output()
+  left = new EventEmitter()
+
+  @Output()
+  right = new EventEmitter()
+
+  @Output()
+  up = new EventEmitter()
+
+  @Output()
+  down = new EventEmitter()
+
+  constructor() {
+
+  }
 
   ngOnInit() {
   }

@@ -95,7 +95,6 @@ export class RobotmapComponent implements OnInit, AfterViewInit {
   onResize(el?) {
     let rect = this.canvasRef.nativeElement.getBoundingClientRect()
     this.dimension = new Vector2(rect.width, rect.height);
-    console.log(this.dimension)
   }
 
   realToPixel(v: Vector2) { return Vector2.divideScalar(v, this.mm_per_pixel) }
@@ -210,9 +209,7 @@ export class RobotmapComponent implements OnInit, AfterViewInit {
     ctx.clearRect(0, 0, Math.max(this.dimension.x, 2000), Math.max(this.dimension.y, 2000))
 
     for(let [key, img] of this._world as any) {
-      let pos = new Vector2(key[0], key[1])
-        .sub(this.viewStart)
-        .divideScalar(this.mm_per_pixel)
+      let pos = this.realToPixel(new Vector2(key[0], key[1]).sub(this.viewStart))
 
         // let drawImage handle out-of-bounds coordinates, just try to draw everything
         ctx.drawImage(img, pos.x, pos.y,
@@ -319,6 +316,7 @@ export class RobotmapComponent implements OnInit, AfterViewInit {
     this.dragging = false
     let rect = this.canvasRef.nativeElement.getBoundingClientRect()
     let drag_end = new Vector2(e.offsetX,e.offsetY)
+    // let drag_end = new Vector2(this.options.width, this.options.width/this.options.ratio)
     let drag = Vector2.sub(drag_end, this.drag_pos)
 
     // Below 5 pixels move, consider it as click

@@ -5,9 +5,9 @@ The 2 primary ways of accessing the file system are to SSH to the robot itself, 
 #### SSH
 In order to SSH to the robot you must be within the same network as the robot, if you are unsure of the robots IP, you will need to manually connect to the robot and check its IP with a network scanner or from the host router.
 
-If the robot is online you may simply do so through the vpn (you may need to ssh to the vpn first).
-`ssh hrst@{network IP}`
-`password:` Enter the user account password.
+If the robot is online you may simply do so through the vpn (you may need to ssh to the vpn first).  
+`ssh hrst@{network IP}`  
+`password:` Enter the user account password.  
 
 You can also directly network to the robot via the ethernet port located on the RPi or the socket underneath the chassis. Plug in the ethernet cable and repeat the above procedure.
 

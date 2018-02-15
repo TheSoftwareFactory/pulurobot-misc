@@ -1,15 +1,37 @@
 # Pulurobot M Operation Documentation
 ## Operational Guide
 ### Accessing RaspberryPi File Partition
-The 2 primary ways of accessing the file system are to SSH to the robot itself, or to remove the SD card from the RPi and access it directly.
-##### SSH
+The 2 primary ways of accessing the file system are to SSH to the robot itself, or to remove the SD card from the RPi and access it directly, note the later requires a MicroSD card Reader.
+#### SSH
 In order to SSH to the robot you must be within the same network as the robot, if you are unsure of the robots IP, you will need to manually connect to the robot and check its IP with a network scanner or from the host router.
 
 If the robot is online you may simply do so through the vpn (you may need to ssh to the vpn first).
 `ssh hrst@{network IP}`
 `password:` Enter the user account password.
 
-You can also directly network to the robot via the ethernet port located on the RPi or the socket underneath the chassi. Plug in the ehternet cable and repeat the above procedure.
+You can also directly network to the robot via the ethernet port located on the RPi or the socket underneath the chassis. Plug in the ethernet cable and repeat the above procedure.
+
+#### Physical Access
+##### RaspberryPI GUI
+
+1. Remove the front panel of the Bot as shown [here.](http://www.pulurobotics.fi/page/pulu-m2-1)
+2. Remove the raspberry pi from the microController.
+3. Plug in an HDMI cable to the RaspberryPi as well as a keyboard and mouse.
+4. Power the RaspberryPi with a micro USB cable and wait for the command line to appear on the monitor.
+5. Log in to the RPi and run:
+    `startx`
+
+##### Secondary Operating System
+Using a microSD Card reader, and another linux system, you can directly access the boot partition and the Raspbian filesystem partition. Plug in the SD card and mount the card as a physical drive.
+1. After connecting the SDcard Reader run the following command and make note of the device name (listed as FileSystem name) excluding the number suffix, it will be similar to '/dev/sdb'.
+    `fdisk -l`
+2. Create the mount directory for the SD card to the prefered directory
+    `mkdir {directory}`
+3. Mount the SD card to the chosen directory
+    `mount {device name} {directory}`
+4. The file system will be mounted in your chosed directory.
+    `cd {directory}`
+
 
 ### Backing up RPi Image
 It is important to backup the SD card before you implement any changes to the Pi as it can be irreversable or you may encounter unforseen issues. You will also need a microSD card reader.

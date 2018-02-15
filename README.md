@@ -25,10 +25,13 @@ You can also directly network to the robot via the ethernet port located on the 
 Using a microSD Card reader, and another linux system, you can directly access the boot partition and the Raspbian filesystem partition. Plug in the SD card and mount the card as a physical drive.
 1. After connecting the SDcard Reader run the following command and make note of the device name (listed as FileSystem name) excluding the number suffix, it will be similar to '/dev/sdb'.
     `fdisk -l`
+
 2. Create the mount directory for the SD card to the prefered directory
     `mkdir {directory}`
+
 3. Mount the SD card to the chosen directory
     `mount {device name} {directory}`
+
 4. The file system will be mounted in your chosed directory.
     `cd {directory}`
 

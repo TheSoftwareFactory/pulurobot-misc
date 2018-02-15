@@ -45,7 +45,7 @@ In the terminal window run the following command using the 'FileSystem' name, ma
 The DD command does not show any progress indications so you will need to wait until the system has completed the copy, this may take several minutes.
 
 ### Network Configuration
-##### General Settings
+#### General Settings
 To connect to a network automatically on bootup you will need acceess to the RPi File partition (instructions on how to d this can be found !here!). Once you have gained access follow these steps:
 
 1. The network interface settingsa are located in the file 'etc/network/interfaces.txt'. To view these settings enter:
@@ -57,7 +57,7 @@ To connect to a network automatically on bootup you will need acceess to the RPi
 2.  Before changing any settings create a backup of the current network interfaces
 	`sudo cp /etc/network/interfaces /etc/network/interfaces.backup`
  
-##### Defining a new connection
+#### Defining a new connection
 1.  Open the text file 'etc/network/interfaces.txt' to edit
     `sudo nano /etc/network/interfaces`
 2.  Enter the SSID and passcode of the desired network next to 'wpa-ssid' and 'wpa-psk' respectively.

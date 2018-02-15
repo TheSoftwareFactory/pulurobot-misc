@@ -43,7 +43,6 @@ Now plug in your SD card and re-run the above command. Your SD Card will be the 
 
 In the terminal window run the following command using the 'FileSystem' name, make sure you do not include the number at the end of the name.
 `sudo dd if=/dev/{sdb - your drive's name} of=~/SDBackup.img`
-
 The DD command does not show any progress indications so you will need to wait until the system has completed the copy, this may take several minutes.
 
 ### Network Configuration
@@ -77,11 +76,3 @@ To connect to a network automatically on bootup you will need acceess to the RPi
 - Raspberrypi-ui-mods
 - Lxterminal
 - LightDM
-
-
-
-
-
-
-
-

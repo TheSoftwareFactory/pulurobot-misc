@@ -19,7 +19,7 @@ export enum CommandCode {
 export enum ReceptionCode {
 	CURRENT_POSITION = 130,
 	LIDAR = 131,
-	CHARGING_STATE = 134,
+	CHARGE_STATE = 134,
 	ROUTE = 135,
 	MAP_UPDATE = 200
 }
@@ -56,13 +56,12 @@ export class ControllerHistoryLine {
 }
 export class ControllerHistory {
 	history: Array<ControllerHistoryLine> = [];
-	maxHistory: number = 10000;
+	maxHistory: number = 50;
 	constructor() {}
 	pushInHistory(sent: boolean, data: DataBuffer) {
 		let line = new ControllerHistoryLine(sent, data)
 		this.history.push(line)
 		while(this.history.length > this.maxHistory)	this.history.shift()
-		console.log(this)
 	}
 }
 
@@ -80,9 +79,10 @@ export class RobotController {
 	public robot: Robot
 
   constructor() {
+		// this._historyTest()
 	}
 
-	private historyTest() {
+	private _historyTest() {
 		let db = new DataBuffer()
 		db.append("Uint8", CommandCode.MANUAL_COMMAND)
 			.append("Uint8", Math.round(Math.random()*8))
@@ -328,16 +328,16 @@ export class RobotController {
             this._retrieveWorld(msg, arrayBuffer)
             break;
           case ReceptionCode.CURRENT_POSITION:
-            this._retrievePosition(payload)
+            this._retrievePosition(payload, arrayBuffer)
             break;
-          case ReceptionCode.CHARGING_STATE:
-            this._retrieveChargingState(payload)
+          case ReceptionCode.CHARGE_STATE:
+            this._retrieveChargingState(payload, arrayBuffer)
             break;
           case ReceptionCode.ROUTE:
-            this._retrieveRoute(payload)
+            this._retrieveRoute(payload, arrayBuffer)
             break;
           case ReceptionCode.LIDAR:
-            this._retrieveLastLidar(payload)
+            this._retrieveLastLidar(payload, arrayBuffer)
             break;
           default:
             console.warn("It seems that your reception code is not handled yet. Code: " + code)
@@ -353,7 +353,7 @@ export class RobotController {
   * world The world retrieved
   */
   onWorldRetrieve(world: Map<any, any>){
-		console.log("Got the world")
+		// console.log("Got the world")
 	}
 
 	/**
@@ -363,7 +363,7 @@ export class RobotController {
 	* angle The angle in radians
 	*/
   onPositionRetrieve(position: Vector2, angle: number) {
-		console.log("Got the position")
+		// console.log("Got the position")
 	}
 
 	/**
@@ -372,7 +372,7 @@ export class RobotController {
 	* position The position of the thing
 	*/
   onChargingStateRetrieve( flags: number, volt: number, volt_in: number, percentage: number){
-		console.log("Got the charge")
+		// console.log("Got the charge")
 	}
 
 	/**
@@ -381,7 +381,7 @@ export class RobotController {
 	* route The route followed by the robot
 	*/
   onRouteRetrieve(route: RobotRoute){
-		console.log("Got the route")
+		// console.log("Got the route")
 	}
 
 	/**
@@ -390,20 +390,29 @@ export class RobotController {
 	* angle The angle of robot in radians
 	*/
   onLastLidarRetrieve(lidar: Lidar, angle: number){
-		console.log("Got the last lidar")
+		// console.log("Got the last lidar")
 	}
 
   private _retrieveWorld(msg, arrayBuffer) {
     let image = new Image()
     let world = new Map()
-    image.onload = () => { this.onWorldRetrieve(world);  }
+		let afterload = () => {
+			world.set([img_x_mm, img_y_mm], image);
+			this.onWorldRetrieve(world);
+			console.log(world)
+		}
+
+		image.onload = (e) => {afterload()}
+
     image.src = URL.createObjectURL(msg.data.slice(10, msg.data.size, "image/png"))
     let img_x_mm = new DataView(arrayBuffer).getInt32(1, false);
     let img_y_mm = new DataView(arrayBuffer).getInt32(5, false);
     let status = new DataView(arrayBuffer).getUint8(9);
     image.width = 256;
     image.height = 256;
-    world.set([img_x_mm, img_y_mm], image);
+
+		afterload()
+
 		let db = DataBuffer.parser( arrayBuffer, [{type:"Uint8"},{type:"Int32"},{type:"Int32"},{type:"Uint8"}])
 		this._history.pushInHistory(false, db)
   }
@@ -412,21 +421,29 @@ export class RobotController {
   * Retrieve the position of robot from the payload
   * callback func What to do with the position as a Vector2 and the angle in radians
   */
-  private _retrievePosition(payload) {
+  private _retrievePosition(payload, arrayBuffer) {
+		let pos = new Vector2(
+			new DataView(payload).getInt32(2, false),
+			new DataView(payload).getInt32(6, false)
+		)
+		let angle = Angle.numericToRad(new DataView(payload).getInt16(0, false),16)
     this.onPositionRetrieve(
-      new Vector2(
-        new DataView(payload).getInt32(2, false),
-        new DataView(payload).getInt32(6, false)
-      ),
-      Angle.numericToRad(new DataView(payload).getInt16(0, false),16)
+      pos,
+      angle
     );
+		if(this.robot) {
+			this.robot.pos = pos
+			this.robot.angle = angle
+		}
+		let db = DataBuffer.parser( arrayBuffer, [{type:"Uint8"}, {type:"Uint8"}, {type:"Uint8"}, {type:"Int16"},{type:"Int32"},{type:"Int32"}])
+		this._history.pushInHistory(false, db)
   }
 
   /**
   * Retrieve informations about the charge
   * callback func Params: flags, volt, volt in and percentage of battery
   */
-  private _retrieveChargingState(payload) {
+  private _retrieveChargingState(payload, arrayBuffer) {
     let flags = new DataView(payload).getUint8(0)
     let volt  = new DataView(payload).getUint16(1, false)
     let percentage = new DataView(payload).getUint8(3)
@@ -435,8 +452,8 @@ export class RobotController {
 		if(this.robot) {
 			this.robot.batteryState 	= flags
 			this.robot.batteryPercent = percentage
-			this.robot.voltIn					= volt_in
-			this.robot.volt						= volt
+			this.robot.voltIn					= Math.round(volt_in) / 1000
+			this.robot.volt						= Math.round(volt) / 1000
 		}
 
     this.onChargingStateRetrieve(
@@ -445,22 +462,29 @@ export class RobotController {
       volt_in,
       percentage
     )
+
+		let db = DataBuffer.parser( arrayBuffer, [{type:"Uint8"}, {type:"Uint8"}, {type:"Uint8"}, {type:"Uint8"},{type:"Uint16"},{type:"Uint8"},{type:"Uint16"}])
+		this._history.pushInHistory(false, db)
   }
 
   /**
   * Retrieve the route the robot calculated toward a target
   * callback func Params: route
   */
-  private _retrieveRoute(payload) {
+  private _retrieveRoute(payload, arrayBuffer) {
     // 9 filler length, -8 for the last octet which is the mode
     let route_len = (payload.length - 8) / 9;
     let route = new RobotRoute()
+
+		let typeTab = [{type:"Uint8"}, {type:"Uint8"}, {type:"Uint8"}]
 
     if(route_len > 0) {
       route.changeStart(
           new DataView(payload).getInt32(0, false),
           new DataView(payload).getInt32(4, false)
         )
+			typeTab.push({type:"Int32"})
+			typeTab.push({type:"Int32"})
 
       for(let i = 0; i < route_len; i++) {
         let offset = 8
@@ -470,22 +494,33 @@ export class RobotController {
           new DataView(payload).getInt32(idx + offset+5, false),
           new DataView(payload).getUint8(idx + offset)
         )
+				typeTab.push({type:"Int32"})
+				typeTab.push({type:"Int32"})
+				typeTab.push({type:"Int8"})
       }
     }
 
     this.onRouteRetrieve( route )
+		let db = DataBuffer.parser( arrayBuffer, typeTab )
+		this._history.pushInHistory(false, db)
   }
 
   /**
   * Retrieve the last lidar
   * callback func Params: lidar, robot_angle
   */
-  private _retrieveLastLidar(payload) {
+  private _retrieveLastLidar(payload, arrayBuffer) {
     let lidar_len = (payload.length - 10) / 2;
+
+		let typeTab = [{type:"Uint8"}, {type:"Uint8"}, {type:"Uint8"}]
     // Not used ?
     let robot_angle = Angle.numericToDeg(new DataView(payload).getInt16(0, false), 16);
     let robot_x = (new DataView(payload).getInt32(2, false));
     let robot_y = (new DataView(payload).getInt32(6, false));
+
+		typeTab.push({type:"Int16"})
+		typeTab.push({type:"Int32"})
+		typeTab.push({type:"Int32"})
 
     let last_lidar = new Lidar()
 
@@ -498,21 +533,25 @@ export class RobotController {
           x * 160 + robot_x,
           y * 160 + robot_y
         )
+			typeTab.push({type:"Int8"})
+			typeTab.push({type:"Int8"})
     }
 
     this.onLastLidarRetrieve(
         last_lidar,
         robot_angle
       )
+		let db = DataBuffer.parser( arrayBuffer, typeTab )
+		this._history.pushInHistory(false, db)
   }
 
   // Default on close
   onSocketClose(event: CloseEvent) {
     let reason;
 
-    if (event.code == 1000)
-      reason = "Normal closure.";
-    else if (event.code == 1001)
+    if (event.code == 1000)	return
+
+    if (event.code == 1001)
       reason = "An endpoint is \"going away\", such as a server going down or a browser having navigated away from a page.";
     else if (event.code == 1002)
       reason = "An endpoint is terminating the connection due to a protocol error";

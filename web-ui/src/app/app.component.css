@@ -1,0 +1,16 @@
+.battery-flickr {
+  animation-duration: 1s;
+  animation-name: flicker;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+@keyframes flicker {
+  from {
+    color: red;
+  }
+
+  to {
+    color: grey;
+  }
+}

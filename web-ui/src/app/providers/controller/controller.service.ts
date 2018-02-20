@@ -76,23 +76,23 @@ export class ControllerService {
 
   // Reception
 
-  set onWorldRetrieve( callback: (world: Map<any, any>) => {}) {
+  set onWorldRetrieve( callback: (world: Map<any, any>) => void) {
     this.controller.onWorldRetrieve = callback
   }
 
-  set onPositionRetrieve( callback: (position: Vector2, angle: number) => {}) {
+  set onPositionRetrieve( callback: (position: Vector2, angle: number) => void) {
     this.controller.onPositionRetrieve = callback
   }
 
-  set onChargingStateRetrieve( callback: ( flags: number, volt: number, volt_in: number, percentage: number) => {}) {
+  set onChargingStateRetrieve( callback: ( flags: number, volt: number, volt_in: number, percentage: number) => void) {
     this.controller.onChargingStateRetrieve = callback
   }
 
-  set onRouteRetrieve( callback: (route: RobotRoute) => {}) {
+  set onRouteRetrieve( callback: (route: RobotRoute) => void) {
     this.controller.onRouteRetrieve = callback
   }
 
-  set onLastLidarRetrieve( callback: (lidar: Lidar, angle: number) => {}) {
+  set onLastLidarRetrieve( callback: (lidar: Lidar, angle: number) => void) {
     this.controller.onLastLidarRetrieve = callback
   }
 }

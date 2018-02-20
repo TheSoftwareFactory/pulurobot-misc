@@ -9,7 +9,14 @@ import { ControllerService } from "../../providers/controller/controller.service
 })
 export class MapComponent implements OnInit {
 
-  constructor(private ctrlServ: ControllerService) {}
+  public world: Map<any, any> = new Map()
+
+  constructor(private ctrlServ: ControllerService) {
+    this.ctrlServ.onWorldRetrieve = (world: Map<any, any>) => {
+        console.log("Got the world")
+        this.world = world
+      }
+  }
 
   get robot() {
     return this.ctrlServ.robot

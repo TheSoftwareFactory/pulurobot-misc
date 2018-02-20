@@ -62,13 +62,19 @@
      <div class="card-body">
        <h4>Message history</h4>
        <p>The history of messages will last until you close the tab</p>
-       <button class="btn btn-sm btn-outline-secondary" (click)="hideDate = !hideDate">Toggle {{hideDate?"on":"off"}} date</button>
+       <div class="text-center" style="display: inline-block">
+         <span class="text-center">Toggle</span>
+         <br/>
+         <button class="btn btn-sm btn-outline-secondary button-toggle" [class.button-toggle-off]="hideDate" (click)="hideDate = !hideDate">Date</button>
+         <button class="btn btn-sm btn-outline-secondary button-toggle button-sent" [class.button-toggle-off]="hideSent" (click)="hideSent = !hideSent">Sent</button>
+         <button class="btn btn-sm btn-outline-secondary button-toggle button-received" [class.button-toggle-off]="hideReceived" (click)="hideReceived = !hideReceived">Received</button>
+       </div>
        <br/><br/>
        <div class="history">
          <div class="history-marker">... Beginning of history ...</div>
          <div class="history-marker" *ngIf="!history.history.length">No history</div>
          <div *ngFor="let line of history.history">
-           <div class="history-line" [class.history-line-sent]="line.sent" [class.history-line-received]="!line.sent">
+           <div *ngIf="line.sent && !hideSent || !line.sent && !hideReceived" class="history-line" [class.history-line-sent]="line.sent" [class.history-line-received]="!line.sent">
              <span class="history-command">{{line.command}}</span>
              <span class="history-date" *ngIf="!hideDate">[{{line.date.toLocaleTimeString()}}]</span>
              <div style="display: inline">

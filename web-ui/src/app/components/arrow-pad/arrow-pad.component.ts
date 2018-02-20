@@ -20,10 +20,29 @@ export class ArrowPadComponent implements OnInit {
   down = new EventEmitter()
 
   constructor() {
-
+    this.left.emit()
+    this.right.emit()
+    this.up.emit()
+    this.down.emit()
   }
 
   ngOnInit() {
+  }
+
+  cleft() {
+    this.left.emit()
+  }
+
+  cright() {
+    this.right.emit()
+  }
+
+  cup() {
+    this.up.emit()
+  }
+
+  cdown() {
+    this.down.emit()
   }
 
 }

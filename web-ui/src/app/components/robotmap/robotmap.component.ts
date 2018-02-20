@@ -54,12 +54,14 @@ export class RobotmapComponent implements OnInit, AfterViewInit {
 
   @Input()
   robot: Robot            = new Robot()
-  get angle() : number {  return Angle.radToDeg(this.robot.angle) }
+  get angle() : number {  return +Angle.radToDeg(this.robot.angle).toFixed(1) }
 
 
   activeRoute: RobotRoute = new RobotRoute();
 
-  private _world: Map<any, any>    = new Map();
+  @Input()
+  public world: Map<any, any>     = new Map()
+
   private _rendering: boolean     = false;
 
   private _robotImg: any
@@ -169,14 +171,6 @@ export class RobotmapComponent implements OnInit, AfterViewInit {
     this.updateScale()
   }
 
-  changeTheWorld(world: Map<any, any>) : Map<any, any> {
-    return this._world = world
-  }
-
-  cleanseTheWorld() {
-    this._world = new Map()
-  }
-
   /**
   * This ensure that you are not gonna redraw out of the blue. You'll redraw
   * you'll redraw when the browser is ready.
@@ -208,7 +202,7 @@ export class RobotmapComponent implements OnInit, AfterViewInit {
     // Little trick to deal with resizing
     ctx.clearRect(0, 0, Math.max(this.dimension.x, 2000), Math.max(this.dimension.y, 2000))
 
-    for(let [key, img] of this._world as any) {
+    for(let [key, img] of this.world as any) {
       let pos = this.realToPixel(new Vector2(key[0], key[1]).sub(this.viewStart))
 
         // let drawImage handle out-of-bounds coordinates, just try to draw everything

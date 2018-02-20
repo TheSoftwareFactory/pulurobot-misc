@@ -34,17 +34,21 @@
   font-style: italic;
   padding: 0px 2px;
 }
+.button-sent,
 .history-line-sent .history-command {
   background-color: #5158b0;
+  color:white;
 }
-
+.button-received,
 .history-line-received .history-command {
   background-color: #fcb07a;
+  color: white;
 }
 
 .history-data {
   padding: 0px 1px;
   border-bottom: 2px solid transparent;
+  border-radius: 0 0 2px 2px;
 }
 
 .history-data-1 {
@@ -58,4 +62,12 @@
 }
 .history-data-8 {
   border-bottom-color: #873209;
+}
+
+.button-toggle {
+  opacity: 1;
+}
+
+.button-toggle-off {
+  opacity: .5;
 }

@@ -9,7 +9,7 @@ import { Component,
   NgZone } from '@angular/core';
 
 import { Vector2, Angle } from "../../models/util";
-import { RobotRoute, Lidar, Robot, ROBOT_SHAPE } from "../../models/robotmap";
+import { RobotRoute, Lidar, Robot } from "../../models/robotmap";
 
 @Component({
   selector: 'robotmap',
@@ -45,6 +45,7 @@ export class RobotmapComponent implements OnInit, AfterViewInit {
   dimension: Vector2      = new Vector2();
   viewStart: Vector2     = new Vector2(-3000);
   private mm_per_pixel: number    = 10.0;
+  private _canvas_px_ratio: number = 1;
 
   get clicked() : boolean {
     return this.robot.target != null
@@ -94,9 +95,11 @@ export class RobotmapComponent implements OnInit, AfterViewInit {
 
   @HostBinding('style.height.px') canvasDim: any;
 
-  onResize(el?) {
+  onResize(el?) : any {
     let rect = this.canvasRef.nativeElement.getBoundingClientRect()
     this.dimension = new Vector2(rect.width, rect.height);
+    this._canvas_px_ratio = this.options.width / rect.width
+    return rect
   }
 
   realToPixel(v: Vector2) { return Vector2.divideScalar(v, this.mm_per_pixel) }
@@ -223,20 +226,6 @@ export class RobotmapComponent implements OnInit, AfterViewInit {
     ctx.drawImage(this._robotImg,imageOffset.x,imageOffset.y, robotDim.x, robotDim.y)
     ctx.restore()
 
-    // ctx.save()
-    // ctx.translate(posRobotPx.x, posRobotPx.y)
-    // ctx.rotate(this.robot.angle)
-    // ctx.beginPath()
-    // ctx.moveTo(ROBOT_SHAPE[0][0] / this.mm_per_pixel, ROBOT_SHAPE[0][1] / this.mm_per_pixel);
-    // for (let i = 0; i < 7; i++) {
-    //     ctx.lineTo(ROBOT_SHAPE[i][0] / this.mm_per_pixel, ROBOT_SHAPE[i][1] / this.mm_per_pixel);
-    // }
-    // ctx.closePath();
-    //
-    // ctx.fillStyle = "#C07040A0";
-    // ctx.fill();
-    // ctx.restore();
-
     // Draw the route
     let len = this.activeRoute.length
     if (len > 0) {
@@ -298,9 +287,10 @@ export class RobotmapComponent implements OnInit, AfterViewInit {
   // Events handling
 
   onMouseDown(e) {
-    let rect = this.canvasRef.nativeElement.getBoundingClientRect();
+    let rect = this.onResize()
     this.drag_pos.x = +(e.clientX - rect.left)
     this.drag_pos.y = +(e.clientY - rect.top)
+    this.drag_pos.multiplyScalar(this._canvas_px_ratio)
     this.dragging = true
   }
 
@@ -308,8 +298,9 @@ export class RobotmapComponent implements OnInit, AfterViewInit {
     if(!this.dragging)  return
 
     this.dragging = false
-    let rect = this.canvasRef.nativeElement.getBoundingClientRect()
+    let rect = this.onResize()
     let drag_end = new Vector2(e.offsetX,e.offsetY)
+    drag_end.multiplyScalar(this._canvas_px_ratio)
     // let drag_end = new Vector2(this.options.width, this.options.width/this.options.ratio)
     let drag = Vector2.sub(drag_end, this.drag_pos)
 
@@ -326,7 +317,7 @@ export class RobotmapComponent implements OnInit, AfterViewInit {
   onMouseMove(e) {
     if(!this.dragging)  return
 
-    let rect = this.canvasRef.nativeElement.getBoundingClientRect()
+    let rect = this.onResize()
     let drag = new Vector2(e.movementX, e.movementY)
 
     this.viewStart.sub(drag.multiplyScalar(this.mm_per_pixel))

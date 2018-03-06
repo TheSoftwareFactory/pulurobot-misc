@@ -5,7 +5,7 @@ def setup(email = 'softwarefactory.cc@gmail.com', password = ''):
     password = input("Enter Password for: softwarefactory.cc@gmail.com (same as Ojabotti VPN)")
     print('Initializing Firebase')
     config = {
-        "apiKey": "AIzaSyBcqg5bT1w0L_2ctz3oZK-cWk7ADwc7bSY",
+        "apiKey": "",
         "authDomain": "puluroboticsm.firebaseapp.com",
         "databaseURL": "https://puluroboticsm.firebaseio.com",
         "storageBucket": "puluroboticsm.appspot.com",
